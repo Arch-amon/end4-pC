@@ -141,6 +141,19 @@ Scope {
 
                 MouseArea  {
                     id: hoverRegion
+                    Binding {
+                        target: GlassLayers
+                        property: "barZone"
+                        value: Math.max(0, barRoot.exclusiveZone)
+                        restoreMode: Binding.RestoreBinding
+                    }
+                    Binding {
+                        target: GlassLayers
+                        property: "barEdge"
+                        value: barRoot.barConfig.bottom ? "bottom" : "top"
+                        restoreMode: Binding.RestoreBinding
+                    }
+
                     hoverEnabled: true
                     anchors {
                         fill: parent
@@ -208,8 +221,8 @@ Scope {
                             bottom: undefined
                         }
                         height: Appearance.rounding.screenRounding
-                        active: (barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.centerOnly)
-                             || (barRoot.barConfig.cornerStyle === 4 || barRoot.barConfig.cornerStyle === 6)
+                        active: !barContent.glassTabs && !barContent.glassHug && ((barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.centerOnly)
+                             || (barRoot.barConfig.cornerStyle === 4 || barRoot.barConfig.cornerStyle === 6))
 
                         states: State {
                             name: "bottom"
@@ -236,6 +249,7 @@ Scope {
 
                             RoundCorner {
                                 id: leftCorner
+                                glass: true
                                 visible: barRoot.barConfig.cornerStyle === 0 || barContent.effectiveLeftLayout.length > 0
                                 anchors {
                                     top: parent.top
@@ -257,6 +271,7 @@ Scope {
                             }
                             RoundCorner {
                                 id: rightCorner
+                                glass: true
                                 visible: barRoot.barConfig.cornerStyle === 0 || barContent.effectiveRightLayout.length > 0
                                 anchors {
                                     right: parent.right

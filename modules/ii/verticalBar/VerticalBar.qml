@@ -82,6 +82,19 @@ Scope {
                     hoverEnabled: true
                     anchors.fill: parent
 
+                    Binding {
+                        target: GlassLayers
+                        property: "barZone"
+                        value: Math.max(0, barRoot.exclusiveZone)
+                        restoreMode: Binding.RestoreBinding
+                    }
+                    Binding {
+                        target: GlassLayers
+                        property: "barEdge"
+                        value: barRoot.barConfig.bottom ? "right" : "left"
+                        restoreMode: Binding.RestoreBinding
+                    }
+
                     Item {
                         id: hoverMaskRegion
                         anchors {
@@ -93,7 +106,8 @@ Scope {
 
                     RoundCorner {
                         id: topPillCorner
-                        visible: barContent.centerOnly && barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0
+                        glass: true
+                        visible: barContent.centerOnly && barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.glassHug
                         y: barContent.centerPillY - implicitSize
                         implicitSize: Appearance.rounding.screenRounding
                         color: barRoot.barConfig.followFrameColor
@@ -123,7 +137,8 @@ Scope {
 
                     RoundCorner {
                         id: bottomPillCorner
-                        visible: barContent.centerOnly && barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0
+                        glass: true
+                        visible: barContent.centerOnly && barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.glassHug
                         y: barContent.centerPillY + barContent.centerPillHeight
                         implicitSize: Appearance.rounding.screenRounding
                         color: barRoot.barConfig.followFrameColor
@@ -204,8 +219,8 @@ Scope {
                             right: undefined
                         }
                         width: Appearance.rounding.screenRounding
-                        active: (barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.centerOnly)
-                             || (barRoot.barConfig.cornerStyle === 4 || barRoot.barConfig.cornerStyle === 6)
+                        active: !barContent.glassTabs && !barContent.glassHug && ((barRoot.barConfig.showBackground && barRoot.barConfig.cornerStyle === 0 && !barContent.centerOnly)
+                             || (barRoot.barConfig.cornerStyle === 4 || barRoot.barConfig.cornerStyle === 6))
 
                         states: State {
                             name: "right"
@@ -232,6 +247,7 @@ Scope {
 
                             RoundCorner {
                                 id: topCorner
+                                glass: true
                                 visible: barRoot.barConfig.cornerStyle === 0 || barContent.effectiveLeftLayout.length > 0
                                 anchors { left: parent.left; right: parent.right; top: parent.top }
                                 implicitSize: Appearance.rounding.screenRounding
@@ -247,6 +263,7 @@ Scope {
                             }
                             RoundCorner {
                                 id: bottomCorner
+                                glass: true
                                 visible: barRoot.barConfig.cornerStyle === 0 || barContent.effectiveRightLayout.length > 0
                                 anchors {
                                     bottom: parent.bottom

@@ -136,6 +136,7 @@ QtObject {
         "desktop:Clock color": { type: "select", get: () => Config.options.background.widgets.clock.color, set: v => { Config.options.background.widgets.clock.color = v; }, get options() { return ["primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1", "layer0"].map(name => ({ value: name, color: Appearance.getColorFromName(name) })); } },
         "desktop:Clock font family": { type: "select", get: () => Config.options.background.widgets.clock.digital.font.family, set: v => { Config.options.background.widgets.clock.digital.font.family = v; }, get options() { return SystemAppearance.fontOptions(Config.options.background.widgets.clock.digital.font.family); } },
         "desktop:Minute hand": { type: "select", get: () => Config.options.background.widgets.clock.cookie.minuteHandStyle, set: v => { Config.options.background.widgets.clock.cookie.minuteHandStyle = v; }, options: [{ displayName: "", icon: "block", value: "hide" }, { displayName: Translation.tr("Classic"), icon: "show_chart", value: "classic" }, { displayName: Translation.tr("Thin"), icon: "horizontal_rule", value: "thin" }, { displayName: Translation.tr("Medium"), icon: "remove", value: "medium" }, { displayName: Translation.tr("Bold"), icon: "format_bold", value: "bold" }] },
+        "desktop:Daily clock variant": { type: "select", get: () => Config.options.background.widgets.clock.daily.variant, set: v => { Config.options.background.widgets.clock.daily.variant = v; }, options: [{ displayName: Translation.tr("Badge"), icon: "cookie", value: "badge" }, { displayName: Translation.tr("Morning"), icon: "wb_twilight", value: "morning" }, { displayName: Translation.tr("Script"), icon: "draw", value: "script" }, { displayName: Translation.tr("Bold"), icon: "format_bold", value: "bold" }] },
         "desktop:Quote text": { type: "text", get: () => Config.options.background.widgets.clock.quote.text, set: v => { Config.options.background.widgets.clock.quote.text = v; } },
         "desktop:Visualizer enable": { type: "switch", get: () => Config.options.background.widgets.visualizer.enable, set: v => { Config.options.background.widgets.visualizer.enable = v; } },
         "desktop:Visualizer style": { type: "select", get: () => Config.options.background.widgets.visualizer.style, set: v => { Config.options.background.widgets.visualizer.style = v; }, options: [{ displayName: Translation.tr("Classic"), icon: "equalizer", value: "bars" }, { displayName: Translation.tr("Mirror"), icon: "flip", value: "mirror" }, { displayName: Translation.tr("Aurora"), icon: "auto_awesome", value: "aurora" }, { displayName: Translation.tr("Ring"), icon: "radio_button_unchecked", value: "ring" }, { displayName: Translation.tr("Dots"), icon: "more_horiz", value: "dots" }] },
@@ -143,6 +144,7 @@ QtObject {
         "desktop:Visualizer sensitivity": { type: "slider", get: () => Config.options.background.widgets.visualizer.sensitivity * 100, set: v => { Config.options.background.widgets.visualizer.sensitivity = Math.round(v) / 100; }, from: 50, to: 300, stopIndicatorValues: [], usePercentTooltip: false },
         "desktop:Visualizer height": { type: "slider", get: () => Config.options.background.widgets.visualizer.height, set: v => { Config.options.background.widgets.visualizer.height = Math.round(v); }, from: 120, to: 600, stopIndicatorValues: [], usePercentTooltip: false },
         "desktop:Visualizer size": { type: "slider", get: () => Config.options.background.widgets.visualizer.ringSize, set: v => { Config.options.background.widgets.visualizer.ringSize = Math.round(v); }, from: 200, to: 900, stopIndicatorValues: [], usePercentTooltip: false },
+        "interface:Glassy UI": { type: "switch", get: () => Config.options.background.widgets.glass.enable, set: v => { Config.options.background.widgets.glass.enable = v; } },
         "desktop:Text enable": { type: "switch", get: () => Config.options.background.widgets.customText.enable, set: v => { Config.options.background.widgets.customText.enable = v; } },
         "desktop:Text shadow": { type: "switch", get: () => Config.options.background.widgets.customText.shadow, set: v => { Config.options.background.widgets.customText.shadow = v; } },
         "desktop:Text auto colors": { type: "switch", get: () => Config.options.background.widgets.customText.color === "", set: v => { Config.options.background.widgets.customText.color = v ? "" : "primary"; } },
@@ -175,7 +177,10 @@ QtObject {
         "services:Prefix app": { type: "text", get: () => Config.options.search.prefix.app, set: v => { Config.options.search.prefix.app = v; } },
         "services:Prefix keybinds": { type: "text", get: () => Config.options.search.prefix.keybinds, set: v => { Config.options.search.prefix.keybinds = v; } },
         "services:City name": { type: "text", get: () => Config.options.bar.weather.city, set: v => { Config.options.bar.weather.city = v; } },
-        "general:Icon theme": { type: "select", get: () => SystemAppearance.iconTheme, set: v => SystemAppearance.setIcons(v), get options() { return SystemAppearance.toOptions(SystemAppearance.iconThemes); } },
+        "general:Icon theme": { type: "select", get: () => Config.options.appearance.icons.theme, set: v => { Config.options.appearance.icons.theme = v; SystemAppearance.applyIconScheme(); }, get options() { return SystemAppearance.toOptions(SystemAppearance.iconThemes); } },
+        "general:Follow icon color scheme": { type: "toggle", get: () => Config.options.appearance.icons.followScheme, set: v => { Config.options.appearance.icons.followScheme = v; SystemAppearance.applyIconScheme(); } },
+        "general:Dynamic icon accent colors": { type: "toggle", get: () => Config.options.appearance.icons.dynamicColor, set: v => { Config.options.appearance.icons.dynamicColor = v; SystemAppearance.applyIconScheme(); } },
+        "general:Prevent Breeze icon override": { type: "toggle", get: () => Config.options.appearance.icons.preventBreezeOverride, set: v => { Config.options.appearance.icons.preventBreezeOverride = v; SystemAppearance.applyIconScheme(); } },
         "general:Cursor theme": { type: "select", get: () => SystemAppearance.cursorTheme, set: v => SystemAppearance.setCursor(v, SystemAppearance.cursorSize), get options() { return SystemAppearance.toOptions(SystemAppearance.cursorThemes); } },
         "general:System font": { type: "select", get: () => SystemAppearance.fontFamily, set: v => SystemAppearance.setFont("ui", v, SystemAppearance.fontSize), get options() { return SystemAppearance.toOptions(SystemAppearance.fonts); } },
         "general:Monospace font": { type: "select", get: () => SystemAppearance.monoFamily, set: v => SystemAppearance.setFont("mono", v, SystemAppearance.monoSize), get options() { return SystemAppearance.toOptions(SystemAppearance.fonts); } },
@@ -495,6 +500,13 @@ QtObject {
             ]
         },
         {
+            page: Translation.tr("Desktop"), title: Translation.tr("Daily clock"), when: "clockdaily", icon: "today", cards: [
+                { type: "select", key: "desktop:Daily clock variant", title: Translation.tr("Variant"), icon: "style" },
+                { type: "toggle", key: "desktop:Clock auto colors", title: Translation.tr("Automatic colors"), icon: "auto_awesome" },
+                { type: "swatch", key: "desktop:Clock color", title: Translation.tr("Color"), icon: "palette", w: 2 }
+            ]
+        },
+        {
             page: Translation.tr("Desktop"), title: Translation.tr("Pixel clock"), when: "clockpixel", icon: "grid_view", cards: [
                 { type: "select", key: "desktop:Pixel clock orientation", title: Translation.tr("Orientation"), icon: "screen_rotation" }
             ]
@@ -546,6 +558,9 @@ QtObject {
         {
             page: Translation.tr("General"), title: Translation.tr("System Appearance"), icon: "palette", cards: [
                 { type: "combo", key: "general:Icon theme", title: Translation.tr("Icon theme"), icon: "category", kw: "icons" },
+                { type: "toggle", key: "general:Follow icon color scheme", title: Translation.tr("Follow color scheme"), icon: "brightness_6", kw: "icons light dark scheme" },
+                { type: "toggle", key: "general:Dynamic icon accent colors", title: Translation.tr("Dynamic accent colors"), icon: "palette", kw: "icons material you recolor" },
+                { type: "toggle", key: "general:Prevent Breeze icon override", title: Translation.tr("Prevent Breeze override"), icon: "shield", kw: "icons kde breeze kmyc" },
                 { type: "combo", key: "general:Cursor theme", title: Translation.tr("Cursor theme"), icon: "mouse" },
                 { type: "combo", key: "general:System font", title: Translation.tr("System font"), icon: "text_fields", kw: "typography" },
                 { type: "combo", key: "general:Monospace font", title: Translation.tr("Monospace font"), icon: "terminal", kw: "terminal code" },

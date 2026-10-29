@@ -116,11 +116,13 @@ Singleton {
         "desktop:Clock style": root.optionSelect("background.widgets.clock.style", [
             { displayName: Translation.tr("Digital"), icon: "timer_10", value: "digital" },
             { displayName: Translation.tr("Cookie"), icon: "cookie", value: "cookie" },
+            { displayName: Translation.tr("Daily"), icon: "today", value: "daily" },
             { displayName: Translation.tr("Pixel"), icon: "grid_view", value: "pixel" }
         ]),
         "desktop:Clock style (locked)": root.optionSelect("background.widgets.clock.styleLocked", [
             { displayName: Translation.tr("Digital"), icon: "timer_10", value: "digital" },
             { displayName: Translation.tr("Cookie"), icon: "cookie", value: "cookie" },
+            { displayName: Translation.tr("Daily"), icon: "today", value: "daily" },
             { displayName: Translation.tr("Pixel"), icon: "grid_view", value: "pixel" }
         ]),
         "desktop:Vertical": root.optionSwitch("background.widgets.clock.digital.vertical"),

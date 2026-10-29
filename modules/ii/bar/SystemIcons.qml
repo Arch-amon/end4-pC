@@ -20,7 +20,7 @@ Item {
     property bool isMaterial: root.barConfig.cornerStyle === 3 || root.barConfig.cornerStyle === 4
     property bool isDi: Config.barHasWidget(root.barScreenName, "dynamicIsland") && root.barConfig.dynamicIsland.rightWidget === "systemIcons"
 
-    readonly property color iconColor: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1))
+    readonly property color iconColor: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? (Config.options.background.widgets.glass.enable ? Appearance.colors.colOnLayer0 : Appearance.colors.colOnPrimary) : Appearance.colors.colOnLayer1))
 
     implicitWidth: root.vertical ? 32 : flow.implicitWidth + (root.isMaterial ? 12 : 4)
     implicitHeight: root.vertical ? flow.implicitHeight + 4 : 32

@@ -558,6 +558,11 @@ ContentPage {
                             value: "cookie"
                         },
                         {
+                            displayName: Translation.tr("Daily"),
+                            icon: "today",
+                            value: "daily"
+                        },
+                        {
                             displayName: Translation.tr("Pixel"),
                             icon: "grid_view",
                             value: "pixel"
@@ -581,6 +586,11 @@ ContentPage {
                             displayName: Translation.tr("Cookie"),
                             icon: "cookie",
                             value: "cookie"
+                        },
+                        {
+                            displayName: Translation.tr("Daily"),
+                            icon: "today",
+                            value: "daily"
                         },
                         {
                             displayName: Translation.tr("Pixel"),
