@@ -513,6 +513,39 @@ ContentPage {
                             }
                         }
 
+                        // A picked accent color replaces the wallpaper as the source of
+                        // the theme until it is cleared, so show it and offer the way back.
+                        readonly property string pinnedAccent: Config.options.appearance.palette.accentColor ?? ""
+
+                        RippleButton {
+                            id: clearAccentButton
+                            visible: accentColorButton.visible && barControls.pinnedAccent !== ""
+                            anchors.right: accentColorButton.left
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 48
+                            height: parent.height
+                            padding: 0
+                            colBackground: Appearance.colors.colTertiaryContainer
+                            colBackgroundHover: Appearance.colors.colTertiaryContainerHover
+                            onClicked: {
+                                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch", "--color", "clear"]);
+                            }
+                            contentItem: Item {
+                                anchors.fill: parent
+
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: "format_color_reset"
+                                    iconSize: 22
+                                    color: Appearance.colors.colOnLayer1
+                                }
+                            }
+                            StyledToolTip {
+                                text: Translation.tr("Use wallpaper colors (clears the accent color %1)").arg(barControls.pinnedAccent)
+                            }
+                        }
+
                         RippleButton {
                             id: accentColorButton
                             visible: ColorSchemes.current === ""
@@ -535,16 +568,35 @@ ContentPage {
                                     iconSize: 22
                                     color: Appearance.colors.colOnLayer1
                                 }
+
+                                // The pinned accent color, if any
+                                Rectangle {
+                                    visible: barControls.pinnedAccent !== ""
+                                    anchors {
+                                        right: parent.right
+                                        bottom: parent.bottom
+                                        margins: 6
+                                    }
+                                    width: 12
+                                    height: 12
+                                    radius: 6
+                                    color: barControls.pinnedAccent || "transparent"
+                                    border.width: 1
+                                    border.color: Appearance.colors.colOnLayer1
+                                }
                             }
                             StyledToolTip {
-                                text: "Change accent color"
+                                text: barControls.pinnedAccent !== ""
+                                    ? Translation.tr("Change accent color (now %1, used instead of the wallpaper)").arg(barControls.pinnedAccent)
+                                    : Translation.tr("Pick an accent color from the screen")
                             }
                         }
 
                         BarScreenPopupButton {
                             id: schemeButton
                             z: 11
-                            anchors.right: accentColorButton.visible ? accentColorButton.left : parent.right
+                            anchors.right: clearAccentButton.visible ? clearAccentButton.left
+                                : accentColorButton.visible ? accentColorButton.left : parent.right
                             anchors.rightMargin: accentColorButton.visible ? 6 : 0
                             anchors.verticalCenter: parent.verticalCenter
                             width: 48
