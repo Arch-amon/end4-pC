@@ -122,6 +122,12 @@ Scope {
         }
 
         Keys.onPressed: (event) => {
+            if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
+                settingsContent.focusSearch();
+                event.accepted = true;
+                return;
+            }
+
             if (event.key === Qt.Key_Escape) {
                 panelWindow.hide();
                 event.accepted = true;

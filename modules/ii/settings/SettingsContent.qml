@@ -18,6 +18,10 @@ Item {
     property bool showingProfile: false
     property bool isMinimal: Config.options.settings.style === "minimal"
 
+    function focusSearch() {
+        searchBar.focusSearch();
+    }
+
     function goToTarget(target) {
         const idx = root.pages.findIndex(p => p.id === target.page);
         if (idx < 0) return;
@@ -227,8 +231,28 @@ Item {
                 color: "transparent"
                 radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut
 
+                SettingsSearchBar {
+                    id: searchBar
+                    anchors {
+                        top: parent.top
+                        // Clear the window's drag handle (top 32px)
+                        topMargin: 28
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    width: Math.min(parent.width - 40, 600)
+                    onResultChosen: result => root.goToTarget({
+                        page: result.pageId,
+                        label: result.kind === "page" ? "" : result.label,
+                        section: result.section,
+                        subsection: result.subsection
+                    })
+                }
+
                 Item {
-                    anchors.fill: parent
+                    anchors {
+                        fill: parent
+                        topMargin: searchBar.anchors.topMargin + searchBar.height + 8
+                    }
 
                     Repeater {
                         id: pagesRepeater
