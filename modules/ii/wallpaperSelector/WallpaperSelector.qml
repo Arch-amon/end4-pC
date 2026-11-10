@@ -40,6 +40,7 @@ Scope {
         sourceComponent: PanelWindow {
             id: panelWindow
             readonly property var monitor: WM.monitorFor(panelWindow.screen)
+            readonly property var barOpts: ScreenConfig.barFor(panelWindow.screen)
             property bool monitorIsFocused: WM.compositor === "hyprland"
                 ? (Hyprland.focusedMonitor?.name == monitor?.name)
                 : (WM.focusedMonitor?.name == monitor?.name)
@@ -52,7 +53,7 @@ Scope {
 
             anchors.top: true
             margins {
-                top: Config?.options.bar.vertical ? Appearance.sizes.hyprlandGapsOut : Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut
+                top: panelWindow.barOpts.vertical ? Appearance.sizes.hyprlandGapsOut : ScreenConfig.barHeightFor(panelWindow.barOpts) + Appearance.sizes.hyprlandGapsOut
             }
 
             mask: Region {

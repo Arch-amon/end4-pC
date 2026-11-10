@@ -162,6 +162,7 @@ Scope {
 
                     BarContent {
                         id: barContent
+                        barOpts: barRoot.barOpts
                         
                         implicitHeight: ScreenConfig.barHeightFor(barRoot.barOpts)
                         anchors {

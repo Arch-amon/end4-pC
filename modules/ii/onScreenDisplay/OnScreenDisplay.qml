@@ -100,6 +100,11 @@ Scope {
         sourceComponent: PanelWindow {
             id: osdRoot
             color: "transparent"
+            screen: root.focusedScreen
+            readonly property var barOpts: ScreenConfig.barFor(osdRoot.screen)
+            // A dynamic island on this monitor's bar shows the OSD itself
+            readonly property bool islandTakesOver: ScreenConfig.hasBar(osdRoot.screen)
+                && ScreenConfig.barHasWidget(osdRoot.barOpts, "dynamicIsland")
 
             Connections {
                 target: root
@@ -111,8 +116,8 @@ Scope {
             WlrLayershell.namespace: "quickshell:onScreenDisplay"
             WlrLayershell.layer: WlrLayer.Overlay
             anchors {
-                top: !Config.options.bar.bottom
-                bottom: Config.options.bar.bottom
+                top: !osdRoot.barOpts.bottom
+                bottom: osdRoot.barOpts.bottom
             }
             mask: Region {
                 item: osdValuesWrapper
@@ -121,13 +126,13 @@ Scope {
             exclusionMode: ExclusionMode.Ignore
             exclusiveZone: 0
             margins {
-                top: Appearance.sizes.barHeight
-                bottom: Appearance.sizes.barHeight
+                top: ScreenConfig.barHeightFor(osdRoot.barOpts)
+                bottom: ScreenConfig.barHeightFor(osdRoot.barOpts)
             }
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-            visible: osdLoader.active && !GlobalStates.dynamicIslandEnabled
+            visible: osdLoader.active && !osdRoot.islandTakesOver
 
             ColumnLayout {
                 id: columnLayout

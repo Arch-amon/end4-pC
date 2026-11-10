@@ -12,7 +12,7 @@ import qs.modules.common.functions
 Item {
     id: root
     // Bar settings of the monitor this widget is on
-    readonly property var barOpts: ScreenConfig.barOf(root)
+    property var barOpts: ScreenConfig.barOf(root) // Set by the bar window
     implicitHeight: ScreenConfig.barHeightFor(root.barOpts)
     width: parent.width
     readonly property real barPadding: 0

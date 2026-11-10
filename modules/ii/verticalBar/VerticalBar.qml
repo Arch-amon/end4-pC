@@ -159,6 +159,7 @@ Scope {
 
                     VerticalBarContent {
                         id: barContent
+                        barOpts: barRoot.barOpts
 
                         implicitWidth: ScreenConfig.verticalBarWidthFor(barRoot.barOpts)
                         anchors {

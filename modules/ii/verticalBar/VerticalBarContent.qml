@@ -14,7 +14,7 @@ import qs.modules.ii.bar as Bar
 Item {
     id: root
     // Bar settings of the monitor this widget is on
-    readonly property var barOpts: ScreenConfig.barOf(root)
+    property var barOpts: ScreenConfig.barOf(root) // Set by the bar window
     implicitWidth: ScreenConfig.verticalBarWidthFor(root.barOpts)
     height: parent.height
 

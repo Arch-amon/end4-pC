@@ -9,114 +9,117 @@ import qs.modules.common.widgets
 
 Scope {
     id: root
-    property real frameThickness: Config.options.bar.frameThickness
-    property color frameColor: Appearance.getColorFromName(Config.options.bar.frameColor)
-    readonly property bool centerOnly: Config.options.bar.layouts.leftLayout.length === 0 && Config.options.bar.layouts.rightLayout.length === 0
-    readonly property bool hideBarSideFrame: Config.options.bar.cornerStyle === 0
-    readonly property string barPosition: {
-        if (Config.options.bar.vertical)
-            return Config.options.bar.bottom ? "right" : "left"
-        return Config.options.bar.bottom ? "bottom" : "top"
-    }
 
-    function frameVisibleFor(side) {
-        if (!Config.options.bar.showFrame) return false
-        if (Config.options.bar.cornerStyle === 0 && side === root.barPosition) {
-            return root.centerOnly || !Config.options.bar.showBackground
+    // Each monitor's frame follows that monitor's bar settings.
+    component FrameGroup: Item {
+        id: group
+        required property var modelData
+        readonly property var barOpts: ScreenConfig.barFor(modelData)
+        readonly property bool hasBar: ScreenConfig.hasBar(modelData)
+        readonly property real frameThickness: barOpts.frameThickness
+        readonly property color frameColor: Appearance.getColorFromName(barOpts.frameColor)
+        readonly property bool centerOnly: barOpts.layouts.leftLayout.length === 0 && barOpts.layouts.rightLayout.length === 0
+        readonly property string barPosition: ScreenConfig.barEdgeFor(barOpts)
+
+        function frameVisibleFor(side) {
+            if (!group.barOpts.showFrame) return false
+            // The hug bar draws its own edge, unless it has nothing to hug
+            if (group.hasBar && group.barOpts.cornerStyle === 0 && side === group.barPosition) {
+                return group.centerOnly || !group.barOpts.showBackground
+            }
+            return true
         }
-        return true
-    }
 
-    function edgeNeedsInput(side) {
-        if (!frameVisibleFor(side)) return false
-        const dockWants = Config.options.dock.enable && Config.options.dock.hoverToReveal && Config.options.dock.position === side
-        const barWants = Config.options.bar.autoHide.enable && root.barPosition === side
-        return dockWants || barWants
+        function edgeNeedsInput(side) {
+            if (!frameVisibleFor(side)) return false
+            const dockWants = Config.options.dock.enable && Config.options.dock.hoverToReveal && Config.options.dock.position === side
+            const barWants = group.hasBar && group.barOpts.autoHide.enable && group.barPosition === side
+            return dockWants || barWants
+        }
     }
 
     component FrameHoverArea: MouseArea {
         required property string side
-        required property string screenName
+        required property FrameGroup group
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
-        enabled: root.edgeNeedsInput(side)
-        onContainsMouseChanged: GlobalStates.setFrameHover(screenName, side, containsMouse)
+        enabled: group.edgeNeedsInput(side)
+        onContainsMouseChanged: GlobalStates.setFrameHover(group.modelData.name, side, containsMouse)
     }
 
     Variants {
         model: Quickshell.screens
 
-        Item {
+        FrameGroup {
             id: frameGroup
-            required property var modelData
 
             PanelWindow { // top
                 screen: frameGroup.modelData
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: root.frameVisibleFor("top") ? root.frameThickness : 0
+                exclusiveZone: frameGroup.frameVisibleFor("top") ? frameGroup.frameThickness : 0
                 WlrLayershell.namespace: "quickshell:screenframe"
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
-                implicitHeight: root.frameThickness
+                implicitHeight: frameGroup.frameThickness
                 anchors { top: true; left: true; right: true }
-                mask: Region { item: root.edgeNeedsInput("top") ? topRect : null }
+                mask: Region { item: frameGroup.edgeNeedsInput("top") ? topRect : null }
 
-                Rectangle { id: topRect; anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("top") }
+                Rectangle { id: topRect; anchors.fill: parent; color: frameGroup.frameColor; visible: frameGroup.frameVisibleFor("top") }
 
-                FrameHoverArea { side: "top"; screenName: frameGroup.modelData.name }
+                FrameHoverArea { side: "top"; group: frameGroup }
             }
 
             PanelWindow { // bottom
                 screen: frameGroup.modelData
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: root.frameVisibleFor("bottom") ? root.frameThickness : 0
+                exclusiveZone: frameGroup.frameVisibleFor("bottom") ? frameGroup.frameThickness : 0
                 WlrLayershell.namespace: "quickshell:screenframe"
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
-                implicitHeight: root.frameThickness
+                implicitHeight: frameGroup.frameThickness
                 anchors { bottom: true; left: true; right: true }
-                mask: Region { item: root.edgeNeedsInput("bottom") ? bottomRect : null }
+                mask: Region { item: frameGroup.edgeNeedsInput("bottom") ? bottomRect : null }
 
-                Rectangle { id: bottomRect; anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("bottom") }
+                Rectangle { id: bottomRect; anchors.fill: parent; color: frameGroup.frameColor; visible: frameGroup.frameVisibleFor("bottom") }
 
-                FrameHoverArea { side: "bottom"; screenName: frameGroup.modelData.name }
+                FrameHoverArea { side: "bottom"; group: frameGroup }
             }
 
             PanelWindow { // left
                 screen: frameGroup.modelData
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: root.frameVisibleFor("left") ? root.frameThickness : 0
+                exclusiveZone: frameGroup.frameVisibleFor("left") ? frameGroup.frameThickness : 0
                 WlrLayershell.namespace: "quickshell:screenframe"
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
-                implicitWidth: root.frameThickness
+                implicitWidth: frameGroup.frameThickness
                 anchors { left: true; top: true; bottom: true }
-                mask: Region { item: root.edgeNeedsInput("left") ? leftRect : null }
+                mask: Region { item: frameGroup.edgeNeedsInput("left") ? leftRect : null }
 
-                Rectangle { id: leftRect; anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("left") }
+                Rectangle { id: leftRect; anchors.fill: parent; color: frameGroup.frameColor; visible: frameGroup.frameVisibleFor("left") }
 
-                FrameHoverArea { side: "left"; screenName: frameGroup.modelData.name }
+                FrameHoverArea { side: "left"; group: frameGroup }
             }
 
             PanelWindow { // right
                 screen: frameGroup.modelData
                 exclusionMode: ExclusionMode.Normal
-                exclusiveZone: root.frameVisibleFor("right") ? root.frameThickness : 0
+                exclusiveZone: frameGroup.frameVisibleFor("right") ? frameGroup.frameThickness : 0
                 WlrLayershell.namespace: "quickshell:screenframe"
                 WlrLayershell.layer: WlrLayer.Top
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
                 color: "transparent"
-                implicitWidth: root.frameThickness
+                implicitWidth: frameGroup.frameThickness
                 anchors { right: true; top: true; bottom: true }
-                mask: Region { item: root.edgeNeedsInput("right") ? rightRect : null }
+                mask: Region { item: frameGroup.edgeNeedsInput("right") ? rightRect : null }
 
-                Rectangle { id: rightRect; anchors.fill: parent; color: root.frameColor; visible: root.frameVisibleFor("right") }
+                Rectangle { id: rightRect; anchors.fill: parent; color: frameGroup.frameColor; visible: frameGroup.frameVisibleFor("right") }
 
-                FrameHoverArea { side: "right"; screenName: frameGroup.modelData.name }
+                FrameHoverArea { side: "right"; group: frameGroup }
             }
         }
     }

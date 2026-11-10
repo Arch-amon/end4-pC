@@ -89,14 +89,12 @@ Singleton {
     }
 
     function barInsets(screenName) {
-        const bar = Config.options.bar
+        const bar = ScreenConfig.barFor(screenName)
         const frame = bar.showFrame ? bar.frameThickness : 0
         const insets = { left: frame, right: frame, top: frame, bottom: frame }
-        const onScreen = bar.screenList.length === 0 || bar.screenList.includes(screenName)
-        if (GlobalStates.barOpen && !GlobalStates.screenLocked && onScreen && !bar.autoHide.enable) {
-            const thickness = bar.vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
-            const edge = bar.vertical ? (bar.bottom ? "right" : "left") : (bar.bottom ? "bottom" : "top")
-            insets[edge] = Math.max(insets[edge], thickness)
+        if (GlobalStates.barOpen && !GlobalStates.screenLocked && ScreenConfig.hasBar(screenName) && !bar.autoHide.enable) {
+            const edge = ScreenConfig.barEdgeFor(bar)
+            insets[edge] = Math.max(insets[edge], ScreenConfig.barThicknessFor(bar))
         }
         return insets
     }

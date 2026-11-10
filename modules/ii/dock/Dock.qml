@@ -60,6 +60,7 @@ Scope {
             visible: !GlobalStates.screenLocked
 
             readonly property bool macos: DockStyle.magnifying
+            readonly property var barOpts: ScreenConfig.barFor(modelData.screen)
             readonly property bool hug: Config.options.dock.style === "hug"
             readonly property string position: modelData.position
             readonly property bool glassHug: hug && Config.options.dock.showBackground && Config.options.background.widgets.glass.enable
@@ -67,8 +68,8 @@ Scope {
             readonly property bool vertical: position !== "bottom"
             readonly property real gap: Appearance.sizes.hyprlandGapsOut
             readonly property real shadowMargin: Appearance.sizes.elevationMargin
-            readonly property color backgroundColor: (hug && Config.options.dock.followFrameColor && Config.options.bar.showFrame)
-                ? Appearance.getColorFromName(Config.options.bar.frameColor)
+            readonly property color backgroundColor: (hug && Config.options.dock.followFrameColor && dockRoot.barOpts.showFrame)
+                ? Appearance.getColorFromName(dockRoot.barOpts.frameColor)
                 : Appearance.getColorFromName(Config.options.dock.backgroundColor)
             readonly property real borderWidth: (Config.options.dock.showBackground && Config.options.dock.showBorder && !hug) ? Config.options.dock.borderWidth : 0
 

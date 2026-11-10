@@ -22,12 +22,13 @@ Scope {
 
     component CornerPanelWindow: PanelWindow {
         id: cornerPanelWindow
+        readonly property var barOpts: ScreenConfig.barFor(screen)
         property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
         property bool fullscreen
-        readonly property bool showFakeRounding: Config.options.bar.cornerStyle !== 5
+        readonly property bool showFakeRounding: cornerPanelWindow.barOpts.cornerStyle !== 5
             && (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !fullscreen))
-        readonly property real frameInset: Config.options.bar.frameThickness
-        readonly property bool showFrameCorner: Config.options.bar.showFrame && !fullscreen
+        readonly property real frameInset: cornerPanelWindow.barOpts.frameThickness
+        readonly property bool showFrameCorner: cornerPanelWindow.barOpts.showFrame && !fullscreen
         visible: showFakeRounding || Config.options.sidebar.cornerOpen.enable || showFrameCorner
         property var corner
 
@@ -141,7 +142,7 @@ Scope {
             visible: cornerPanelWindow.showFrameCorner
             corner: cornerPanelWindow.corner
             implicitSize: Math.max(0, Appearance.rounding.screenRounding - cornerPanelWindow.frameInset)
-            color: Appearance.getColorFromName(Config.options.bar.frameColor)
+            color: Appearance.getColorFromName(cornerPanelWindow.barOpts.frameColor)
             anchors {
                 top: cornerWidget.isTop ? parent.top : undefined
                 bottom: cornerWidget.isBottom ? parent.bottom : undefined

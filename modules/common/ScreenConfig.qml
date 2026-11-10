@@ -30,6 +30,7 @@ Singleton {
     // All profiles have been read, so bars can be created in their final style.
     readonly property bool ready: {
         const instances = profileVariants.instances;
+        if (instances.length < Quickshell.screens.length) return false;
         for (let i = 0; i < instances.length; i++)
             if (!instances[i].settled) return false;
         return true;
@@ -69,8 +70,14 @@ Singleton {
         return (settings && settings.customBar) ? settings.bar : Config.options.bar;
     }
 
-    // Same as barFor(), for the monitor whose window contains `item`.
+    // Bar settings for `item`: those of the nearest ancestor that has a
+    // `barOpts` (bar contents get theirs from the bar window), otherwise
+    // those of the monitor its window is on. Walking up the parents matters
+    // because a window only gets its screen once it's fully created, so
+    // QsWindow alone would briefly report the global bar.
     function barOf(item) {
+        for (let p = item?.parent; p; p = p.parent)
+            if (p.barOpts !== undefined) return p.barOpts;
         return root.barFor(item?.QsWindow?.window?.screen);
     }
 

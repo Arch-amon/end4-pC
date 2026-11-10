@@ -10,10 +10,13 @@ import Quickshell.Hyprland
 Scope {
     id: root
     property int sidebarWidth: Appearance.sizes.sidebarWidth
-    readonly property bool centerOnly: Config.options.bar.layouts.leftLayout.length === 0 && Config.options.bar.layouts.rightLayout.length === 0 && !Config.options.bar.vertical
-    readonly property real barCenterOnlyOffset: (Config.options.bar.centerOnlyReserveFrame && root.centerOnly)
-        ? Config.options.bar.frameThickness
-        : Appearance.sizes.barHeight
+    // The sidebar opens on the focused monitor, so it lines up with that bar
+    readonly property var barOpts: ScreenConfig.barFor(WM.focusedMonitor?.name)
+    readonly property bool centerOnly: ScreenConfig.hasBar(WM.focusedMonitor?.name)
+        && root.barOpts.layouts.leftLayout.length === 0 && root.barOpts.layouts.rightLayout.length === 0 && !root.barOpts.vertical
+    readonly property real barCenterOnlyOffset: (root.barOpts.centerOnlyReserveFrame && root.centerOnly)
+        ? root.barOpts.frameThickness
+        : ScreenConfig.barHeightFor(root.barOpts)
 
     PanelWindow {
         id: panelWindow
@@ -78,10 +81,10 @@ Scope {
 
         margins {
             top: {
-                if (Config.options.bar.bottom) return 0;
-                if (Config?.options.bar.autoHide.enable) return 0;
+                if (root.barOpts.bottom) return 0;
+                if (root.barOpts.autoHide.enable) return 0;
                 if (!centerOnly) return 0;
-                switch (Config.options.bar.cornerStyle) {
+                switch (root.barOpts.cornerStyle) {
                 case 0:
                 case 4:
                 case 6: return -root.barCenterOnlyOffset;
@@ -92,10 +95,10 @@ Scope {
                 }
             }
             bottom: {
-                if (!Config.options.bar.bottom) return 0;
-                if (Config?.options.bar.autoHide.enable) return 0;
+                if (!root.barOpts.bottom) return 0;
+                if (root.barOpts.autoHide.enable) return 0;
                 if (!centerOnly) return 0;
-                switch (Config.options.bar.cornerStyle) {
+                switch (root.barOpts.cornerStyle) {
                 case 0:
                 case 4:
                 case 6: return -root.barCenterOnlyOffset;

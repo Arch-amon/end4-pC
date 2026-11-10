@@ -19,14 +19,16 @@ Scope {
         id: panelWindow
         property string searchingText: ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
-        readonly property bool barCenterOnly: Config.options.bar.layouts.leftLayout.length === 0
-            && Config.options.bar.layouts.rightLayout.length === 0
-            && !Config.options.bar.vertical
+        readonly property var barOpts: ScreenConfig.barFor(panelWindow.screen)
+        readonly property bool barCenterOnly: ScreenConfig.hasBar(panelWindow.screen)
+            && panelWindow.barOpts.layouts.leftLayout.length === 0
+            && panelWindow.barOpts.layouts.rightLayout.length === 0
+            && !panelWindow.barOpts.vertical
 
         readonly property bool barOverlapActive: panelWindow.barCenterOnly
-            && Config.options.bar.centerOnlyReserveFrame
-            && !Config.options.bar.bottom
-            && !Config.options.bar.autoHide.enable
+            && panelWindow.barOpts.centerOnlyReserveFrame
+            && !panelWindow.barOpts.bottom
+            && !panelWindow.barOpts.autoHide.enable
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
         visible: GlobalStates.overviewOpen
 
@@ -107,7 +109,7 @@ Scope {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.top
                 topMargin: panelWindow.barOverlapActive
-                    ? Appearance.sizes.barHeight - Config.options.bar.frameThickness
+                    ? ScreenConfig.barHeightFor(panelWindow.barOpts) - panelWindow.barOpts.frameThickness
                     : 0
             }
             spacing: -8

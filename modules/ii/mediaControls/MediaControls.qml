@@ -32,14 +32,17 @@ Scope {
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
     property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
+    // The controls open on the focused monitor, next to that monitor's bar
+    readonly property var barOpts: ScreenConfig.barFor(WM.focusedMonitor?.name)
+
     readonly property string mediaPosition: {
-        if (Config.options.bar.layouts.leftLayout.includes("media")) return "left"
-        if (Config.options.bar.layouts.middleLayout.includes("media")) return "center"
-        if (Config.options.bar.layouts.rightLayout.includes("media")) return "right"
+        if (root.barOpts.layouts.leftLayout.includes("media")) return "left"
+        if (root.barOpts.layouts.middleLayout.includes("media")) return "center"
+        if (root.barOpts.layouts.rightLayout.includes("media")) return "right"
         return "center"
     }
 
-    readonly property bool barVertical: Config.options.bar.vertical
+    readonly property bool barVertical: root.barOpts.vertical
     readonly property string growFrom: {
         if (barEdge === "bottom") return "bottom"
         if (barEdge === "top") return "top"
@@ -47,11 +50,19 @@ Scope {
         if (mediaPosition === "right") return "bottom"
         return "center"
     }
-    readonly property string barEdge: {
-        if (!barVertical) return Config.options.bar.bottom ? "bottom" : "top"
-        return Config.options.bar.bottom ? "right" : "left"
+    readonly property string barEdge: ScreenConfig.barEdgeFor(root.barOpts)
+    readonly property real barThickness: barVertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : ScreenConfig.barHeightFor(root.barOpts)
+
+    // Whether a bar shows something animated by cava
+    function barWantsVisualizer(bar) {
+        const layouts = bar.layouts
+        return layouts.leftLayout.includes("visualizer")
+            || layouts.middleLayout.includes("visualizer")
+            || layouts.rightLayout.includes("visualizer")
+            || (layouts.middleLayout.includes("dynamicIsland")
+                && (bar.dynamicIsland.visualizerStyle === "wave"
+                    || (bar.dynamicIsland.visualizerStyle === "dots" && !bar.dynamicIsland.showMediaControls)))
     }
-    readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
 
     function filterDuplicatePlayers(players) {
         let filtered = [];
@@ -88,12 +99,7 @@ Scope {
             GlobalStates.sidebarRightOpen ||
             (GlobalStates.sidebarLeftOpen && !GlobalStates.mediaLyricsVisible) ||
             GlobalStates.equalizerOpen ||
-            Config.options.bar.layouts.leftLayout.includes("visualizer") ||
-            Config.options.bar.layouts.middleLayout.includes("visualizer") ||
-            (Config.options.bar.layouts.middleLayout.includes("dynamicIsland") &&
-                (Config.options.bar.dynamicIsland.visualizerStyle === "wave" ||
-                (Config.options.bar.dynamicIsland.visualizerStyle === "dots" && !Config.options.bar.dynamicIsland.showMediaControls))) ||
-            Config.options.bar.layouts.rightLayout.includes("visualizer") ||
+            ScreenConfig.anyBar(bar => root.barWantsVisualizer(bar)) ||
             Config.options.background.widgets.visualizer.enable)
             && (MprisController.activePlayer?.isPlaying ?? false)
         onRunningChanged: {
@@ -170,17 +176,17 @@ Scope {
 
             Component.onCompleted: {
                 HyprlandData.updateMonitors()
-                if (!Config.options.bar.media.alwaysVisible)
+                if (!root.barOpts.media.alwaysVisible)
                     GlobalFocusGrab.addDismissable(panelWindow);
             }
             Component.onDestruction: {
-                if (!Config.options.bar.media.alwaysVisible)
+                if (!root.barOpts.media.alwaysVisible)
                     GlobalFocusGrab.removeDismissable(panelWindow);
             }
             Connections {
                 target: GlobalFocusGrab
                 function onDismissed() {
-                    if (!Config.options.bar.media.alwaysVisible)
+                    if (!root.barOpts.media.alwaysVisible)
                         GlobalStates.mediaControlsOpen = false;
                 }
             }

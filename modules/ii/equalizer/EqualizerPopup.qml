@@ -40,21 +40,20 @@ Scope {
     // No standalone "equalizer" bar entry anymore - it only opens via the
     // button inside the media popup, so position it the same way the media
     // popup itself is positioned (wherever "media" sits in the bar layout).
+    // Opens on the focused monitor, next to that monitor's bar
+    readonly property var barOpts: ScreenConfig.barFor(WM.focusedMonitor?.name)
     readonly property string equalizerPosition: {
-        if (Config.options.bar.layouts.leftLayout.includes("media")) return "left"
-        if (Config.options.bar.layouts.middleLayout.includes("media")) return "center"
-        if (Config.options.bar.layouts.rightLayout.includes("media")) return "right"
+        if (root.barOpts.layouts.leftLayout.includes("media")) return "left"
+        if (root.barOpts.layouts.middleLayout.includes("media")) return "center"
+        if (root.barOpts.layouts.rightLayout.includes("media")) return "right"
         return "center"
     }
 
-    readonly property bool barVertical: Config.options.bar.vertical
-    readonly property string barEdge: {
-        if (!barVertical) return Config.options.bar.bottom ? "bottom" : "top"
-        return Config.options.bar.bottom ? "right" : "left"
-    }
-    readonly property real gap: Config.options.bar.cornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
-    readonly property bool cornerStyleReducesGap: Config.options.bar.cornerStyle === 1 || Config.options.bar.cornerStyle === 2
-    readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
+    readonly property bool barVertical: root.barOpts.vertical
+    readonly property string barEdge: ScreenConfig.barEdgeFor(root.barOpts)
+    readonly property real gap: root.barOpts.cornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
+    readonly property bool cornerStyleReducesGap: root.barOpts.cornerStyle === 1 || root.barOpts.cornerStyle === 2
+    readonly property real barThickness: barVertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : ScreenConfig.barHeightFor(root.barOpts)
 
     // Now-playing art, purely decorative here (same download-cache approach
     // Player.qml uses) - if nothing is playing this just stays blank and the

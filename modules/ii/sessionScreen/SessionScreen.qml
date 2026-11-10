@@ -321,7 +321,9 @@ Scope {
         description: "Toggles session screen on press"
 
         onPressed: {
-            if (Config.options.bar.layouts.middleLayout.includes("dynamicIsland")) {
+            // The focused monitor's island shows the session menu, if it has one
+            const bar = ScreenConfig.barFor(root.focusedScreenName)
+            if (ScreenConfig.hasBar(root.focusedScreenName) && bar.layouts.middleLayout.includes("dynamicIsland")) {
                 GlobalStates.diSessionOpen = !GlobalStates.diSessionOpen;
             } else {
                 GlobalStates.sessionOpen = !GlobalStates.sessionOpen;

@@ -82,7 +82,7 @@ Item {
                 : DockStyle.position === "right" ? Edges.Left
                 : Edges.Top
 
-            readonly property int workspacesShown: Math.max(1, Config.options?.bar.workspaces.shown ?? 10)
+            readonly property int workspacesShown: Math.max(1, ScreenConfig.barFor(root.screen).workspaces.shown ?? 10)
             readonly property int workspaceGroup: {
                 const activeId = WM.activeWorkspaceForMonitor(root.screen?.name)?.id ?? 1;
                 return Math.floor((Math.max(activeId, 1) - 1) / workspacesShown);
