@@ -351,7 +351,9 @@ ContentPage {
                     ConfigSwitch {
                         buttonIcon: "variable_insert"
                         text: Translation.tr("Show Background")
-                        enabled: page.bar.cornerStyle === 0 || page.bar.cornerStyle === 1
+                        // The bar draws a background for Hug, Float and Panel; Plain and
+                        // the M3/Split tab styles draw their own, so it does nothing there.
+                        enabled: [0, 1, 5].includes(page.bar.cornerStyle)
                         checked: page.bar.showBackground
                         onCheckedChanged: { page.bar.showBackground = checked; }
                     }
