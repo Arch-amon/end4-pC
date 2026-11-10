@@ -236,12 +236,37 @@ Scope {
         }
     }
     CompositorGlobalShortcut {
+        id: overviewWorkspacesToggleShortcut
         name: "overviewWorkspacesToggle"
         description: "Toggles overview on press"
 
+        // How Hyprland delivers this shortcut depends on the bind:
+        //  - press bind:   pressed, then released when the key goes up
+        //  - release bind: released only (the default Super tap; on
+        //                  Hyprland 0.57 it never sends pressed)
+        //  - dispatch/IPC: pressed only
+        // Toggle on pressed, and on a released that had no pressed just
+        // before it, so every case toggles exactly once.
+        property bool pressPending: false
+
         onPressed: {
             GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            pressPending = true;
+            pressPendingTimer.restart();
         }
+        onReleased: {
+            if (pressPending) {
+                pressPending = false;
+                return;
+            }
+            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+        }
+    }
+    // A pressed without a released (dispatch/IPC) must not swallow the next tap
+    Timer {
+        id: pressPendingTimer
+        interval: 1500
+        onTriggered: overviewWorkspacesToggleShortcut.pressPending = false
     }
     CompositorGlobalShortcut {
         name: "searchToggleRelease"
