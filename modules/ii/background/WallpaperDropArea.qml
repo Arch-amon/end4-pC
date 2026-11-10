@@ -11,6 +11,7 @@ DropArea {
     keys: ["text/uri-list"]
 
     property var currentUrls: []
+    property string screenName: "" // Monitor this drop area is on
 
     onEntered: (drag) => {
         drag.accepted = drag.hasUrls
@@ -32,7 +33,9 @@ DropArea {
             const path = CF.FileUtils.trimFileProtocol(decodeURIComponent(drop.urls[0].toString()))
             const validExt = /\.(png|jpe?g|webp|bmp|gif)$/i.test(path)
             if (validExt) {
-                Wallpapers.select(path, Appearance.m3colors.darkmode)
+                // Monitors with their own wallpaper keep it per monitor
+                const target = ScreenConfig.hasOwnWallpaper(root.screenName) ? root.screenName : ""
+                Wallpapers.select(path, Appearance.m3colors.darkmode, null, target)
             } else {
                 const globalPos = root.mapToGlobal(drop.x, drop.y)
                 DropShelf.show(drop.urls, globalPos.x, globalPos.y)

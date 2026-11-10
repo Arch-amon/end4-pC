@@ -371,7 +371,7 @@ Item {
             positionViewAtIndex(currentIndex, GridView.Contain);
             const filePath = getModelProp(currentIndex, "filePath");
             const isDir = getModelProp(currentIndex, "fileIsDir");
-            if (!isDir && filePath && Config.options.background.enableWallpaperPreview) Wallpapers.startPreview(filePath);
+            if (!isDir && filePath && Config.options.background.enableWallpaperPreview) Wallpapers.startPreview(filePath, GlobalStates.wallpaperSelectorScreen);
         }
 
         function activateCurrent() {
@@ -539,7 +539,7 @@ Item {
                             root.wallpaperSelected(delegateCell.modelData.filePath);
                         } else {
                             if (!delegateCell.modelData.fileIsDir && Config.options.background.enableWallpaperPreview) {
-                                Wallpapers.startPreview(delegateCell.modelData.filePath);
+                                Wallpapers.startPreview(delegateCell.modelData.filePath, GlobalStates.wallpaperSelectorScreen);
                             }
                         }
                     }

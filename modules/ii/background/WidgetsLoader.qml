@@ -106,6 +106,7 @@ Item {
         id: visualizerComp
         VisualizerWidget {
             showSelectionBorder: false
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -117,6 +118,7 @@ Item {
     Component {
         id: imageCardComp
         ImageCardWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -128,6 +130,7 @@ Item {
     Component {
         id: customImageComp
         CustomImage {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -139,6 +142,7 @@ Item {
     Component {
         id: stickerComp
         StickerWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -150,6 +154,7 @@ Item {
     Component {
         id: calendarComp
         CalendarWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -161,6 +166,7 @@ Item {
     Component {
         id: weatherComp
         WeatherWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -172,6 +178,7 @@ Item {
     Component {
         id: clockComp
         ClockWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -184,6 +191,7 @@ Item {
     Component {
         id: notesComp
         NotesWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -195,6 +203,7 @@ Item {
     Component {
         id: mediaComp
         MediaWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -206,6 +215,7 @@ Item {
     Component {
         id: imagesComp
         ImageConverterWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -217,6 +227,7 @@ Item {
     Component {
         id: resourcesComp
         ResourcesWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -228,6 +239,7 @@ Item {
     Component {
         id: worldClockComp
         WorldClockWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -239,6 +251,7 @@ Item {
     Component {
         id: userCardComp
         UserCardWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -250,6 +263,7 @@ Item {
     Component {
         id: todoComp
         TodoWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -261,6 +275,7 @@ Item {
     Component {
         id: timersComp
         TimerWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -272,6 +287,7 @@ Item {
     Component {
         id: customTextComp
         CustomTextWidget {
+            screenName: root.screen.name
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width

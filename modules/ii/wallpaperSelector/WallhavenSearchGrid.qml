@@ -47,7 +47,7 @@ Item {
             downloading = false
             downloadingId = ""
             if (success && localPath) {
-                Wallpapers.apply(localPath, root.useDarkMode)
+                Wallpapers.apply(localPath, root.useDarkMode, GlobalStates.wallpaperSelectorScreen)
                 root.wallpaperApplied()
             }
         })

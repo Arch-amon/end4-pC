@@ -22,8 +22,9 @@ Variants {
         id: bgRoot
 
         required property var modelData
-        property string currentWallpaperSource: Config.options.background.wallpaperPath
-        property string previousWallpaperSource: Config.options.background.wallpaperPath
+        readonly property string screenName: modelData.name
+        property string currentWallpaperSource: ScreenConfig.wallpaperFor(screenName)
+        property string previousWallpaperSource: ScreenConfig.wallpaperFor(screenName)
         property bool videoRevealed: false
 
         readonly property real splitFraction: {
@@ -54,11 +55,19 @@ Variants {
         property string effectiveWallpaperPath: {
             if (GlobalStates.screenLocked && Config.options.background.lockWall !== "")
                 return Config.options.background.lockWall;
-            return Wallpapers.previewPath || Wallpapers.confirmedPath || Config.options.background.wallpaperPath;
+            return Wallpapers.previewFor(bgRoot.screenName) || Wallpapers.confirmedFor(bgRoot.screenName)
+                || ScreenConfig.wallpaperFor(bgRoot.screenName);
+        }
+
+        // This monitor's own wallpaper changed: stop showing the one just applied
+        Connections {
+            target: ScreenConfig.profile(bgRoot.screenName)?.settings ?? null
+            ignoreUnknownSignals: true
+            function onWallpaperPathChanged() { Wallpapers.setConfirmed(bgRoot.screenName, ""); }
         }
 
         property bool wallpaperIsVideo: bgRoot.effectiveWallpaperPath.endsWith(".mp4") || bgRoot.effectiveWallpaperPath.endsWith(".webm") || bgRoot.effectiveWallpaperPath.endsWith(".mkv") || bgRoot.effectiveWallpaperPath.endsWith(".avi") || bgRoot.effectiveWallpaperPath.endsWith(".mov")
-        property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : bgRoot.effectiveWallpaperPath
+        property string wallpaperPath: wallpaperIsVideo ? ScreenConfig.thumbnailFor(bgRoot.screenName) : bgRoot.effectiveWallpaperPath
         property bool wallpaperSafetyTriggered: {
             const enabled = Config.options.workSafety.enable.wallpaper;
             const sensitiveWallpaper = (CF.StringUtils.stringListContainsSubstring(wallpaperPath.toLowerCase(), Config.options.workSafety.triggerCondition.fileKeywords));
@@ -179,9 +188,13 @@ Variants {
             running: Config.options.wallpaperSelector.changeInterval > 0
             repeat: true
             onTriggered: {
-                if (Wallpapers.folderModel.count > 0) {
+                if (Wallpapers.folderModel.count === 0) return
+                // A monitor with its own wallpaper shuffles it; the global
+                // wallpaper is shuffled once, by the first monitor showing it.
+                if (ScreenConfig.hasOwnWallpaper(bgRoot.screenName))
+                    Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, bgRoot.screenName)
+                else if (Quickshell.screens.find(s => !ScreenConfig.hasOwnWallpaper(s))?.name === bgRoot.screenName)
                     Wallpapers.randomFromCurrentFolder()
-                }
             }
         }
 
@@ -364,6 +377,7 @@ Variants {
             /* Wallpaper Drop Area */
             WallpaperDropArea {
                 anchors.fill: parent
+                screenName: bgRoot.screenName
             }
 
             /* Multiple wallpapers drop targets (below widgets so their drop areas win =) */

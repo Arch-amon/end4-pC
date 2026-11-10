@@ -122,7 +122,7 @@ MouseArea {
             Image {
                 id: lockBgSource
                 anchors.fill: parent
-                source: Config.options.background.wallpaperPath
+                source: ScreenConfig.wallpaperFor(root.QsWindow.window?.screen)
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true

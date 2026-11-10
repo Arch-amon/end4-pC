@@ -119,10 +119,20 @@ Scope {
         }
     }
 
+    // The focused monitor if it has its own wallpaper, else the global one
+    function defaultTarget() {
+        const focused = WM.focusedMonitor?.name ?? "";
+        return ScreenConfig.hasOwnWallpaper(focused) ? focused : "";
+    }
+
     function toggleWallpaperSelector() {
         if (Config.options.wallpaperSelector.useSystemFileDialog) {
-            Wallpapers.openFallbackPicker(Appearance.m3colors.darkmode);
+            Wallpapers.openFallbackPicker(Appearance.m3colors.darkmode, "", root.defaultTarget());
             return;
+        }
+        if (!GlobalStates.wallpaperSelectorOpen) {
+            GlobalStates.wallpaperSelectorTarget = "wallpaper";
+            GlobalStates.wallpaperSelectorScreen = root.defaultTarget();
         }
         GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen
     }
@@ -135,7 +145,7 @@ Scope {
         }
 
         function random(): void {
-            Wallpapers.randomFromCurrentFolder();
+            Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, root.defaultTarget());
         }
     }
 
@@ -151,7 +161,7 @@ Scope {
         name: "wallpaperSelectorRandom"
         description: "Select random wallpaper in current folder"
         onPressed: {
-            Wallpapers.randomFromCurrentFolder();
+            Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, root.defaultTarget());
         }
     }
 }

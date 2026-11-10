@@ -50,6 +50,8 @@ Singleton {
     property real desktopMenuX: 0
     property real desktopMenuY: 0
     property string wallpaperSelectorTarget: "wallpaper"
+    // Monitor whose wallpaper the selector changes; empty = the global one
+    property string wallpaperSelectorScreen: ""
     property bool dropShelfOpen: false
     property real dropShelfX: 0
     property real dropShelfY: 0

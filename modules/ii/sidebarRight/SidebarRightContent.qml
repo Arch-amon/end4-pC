@@ -270,7 +270,7 @@ Item {
                                 fillMode: Image.PreserveAspectCrop
                                 source: Config.options.sidebar.bannerImage !== "" 
                                     ? Config.options.sidebar.bannerImage 
-                                    : Config.options.background.wallpaperPath
+                                    : ScreenConfig.wallpaperFor(ScreenConfig.themeSourceScreen)
                                 cache: false
                                 antialiasing: true
                                 sourceSize.width: wallpaperRect.width * 2

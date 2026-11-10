@@ -179,8 +179,9 @@ Item {
 
     readonly property string wallpaper: {
         const lockWall = Config.options.background.lockWall ?? ""
-        const path = GlobalStates.screenLocked && lockWall !== "" ? lockWall : Config.options.background.wallpaperPath
-        return /\.(mp4|webm|mkv|avi|mov)$/.test(path) ? Config.options.background.thumbnailPath : path
+        // The glass refracts the wallpaper of the monitor it's on
+        const path = GlobalStates.screenLocked && lockWall !== "" ? lockWall : ScreenConfig.wallpaperFor(root.scr?.name)
+        return /\.(mp4|webm|mkv|avi|mov)$/.test(path) ? ScreenConfig.thumbnailFor(root.scr?.name) : path
     }
 
     Loader {

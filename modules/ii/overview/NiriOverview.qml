@@ -337,7 +337,7 @@ Item {
                         Image {
                             id: ovBgSource
                             anchors.fill: parent
-                            source: Config.options.background.wallpaperPath
+                            source: ScreenConfig.wallpaperFor(root.screen)
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             cache: true

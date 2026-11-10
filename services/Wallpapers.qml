@@ -39,7 +39,8 @@ Singleton {
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running
     property real thumbnailGenerationProgress: 0
     property string previewPath: ""  // Set during arrow navigation; empty by default
-    property string confirmedPath: ""  // Holds confirmed path until config catches up
+    property string previewScreen: ""  // Monitor being previewed on; empty = monitors on the global wallpaper
+    property var confirmedPaths: ({})  // Target ("" = global) -> path, until the config catches up
 
     signal changed()
     signal thumbnailGenerated(directory: string)
@@ -47,9 +48,49 @@ Singleton {
 
     function load () {} // For forcing initialization
 
-    function startPreview(path) {
+    function startPreview(path, screenName = "") {
         if (!path || path.length === 0) return;
+        root.previewScreen = screenName;
         root.previewPath = path;
+    }
+
+    // Preview shown on a monitor, if any
+    function previewFor(screenName) {
+        if (!root.previewPath) return "";
+        const targeted = root.previewScreen !== ""
+            ? root.previewScreen === screenName
+            : !ScreenConfig.hasOwnWallpaper(screenName);
+        return targeted ? root.previewPath : "";
+    }
+
+    // Wallpaper just applied to a monitor that its config doesn't show yet
+    function confirmedFor(screenName) {
+        const own = root.confirmedPaths[screenName];
+        if (own) return own;
+        return ScreenConfig.hasOwnWallpaper(screenName) ? "" : (root.confirmedPaths[""] ?? "");
+    }
+
+    function setConfirmed(screenName, path) {
+        const paths = Object.assign({}, root.confirmedPaths);
+        if (path) paths[screenName] = path;
+        else delete paths[screenName];
+        root.confirmedPaths = paths;
+    }
+
+    // Drop confirmed paths once the config has them
+    Connections {
+        target: Config.options.background
+        function onWallpaperPathChanged() { root.setConfirmed("", ""); }
+    }
+
+    // Arguments telling switchwall.sh which monitor a change is for
+    function targetArgs(screenName) {
+        if (!screenName) return [];
+        // Pin the theme to the primary monitor the first time a monitor gets
+        // its own wallpaper, so the colors keep following what it shows.
+        if (!Config.options.background.themeSourceScreen)
+            Config.options.background.themeSourceScreen = ScreenConfig.themeSourceScreen;
+        return ["--monitor", screenName, "--theme-source", ScreenConfig.themeSourceScreen];
     }
 
     function stopPreview() {
@@ -61,18 +102,29 @@ Singleton {
         id: applyProc
     }
     
-    function openFallbackPicker(darkMode = Appearance.m3colors.darkmode, startDir = "") {
-        const args = [Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light"];
+    function openFallbackPicker(darkMode = Appearance.m3colors.darkmode, startDir = "", screenName = "") {
+        const args = [Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light", ...root.targetArgs(screenName)];
         if (startDir !== "") {
             args.push("--start-dir", startDir);
         }
         Quickshell.execDetached(args);
     }
 
-    function apply(path, darkMode = Appearance.m3colors.darkmode) {
+    // Set the wallpaper of a monitor, or the global one when screenName is empty
+    function apply(path, darkMode = Appearance.m3colors.darkmode, screenName = "") {
         if (!path || path.length === 0) return;
-        root.confirmedPath = path;
-        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light", "--image", path]);
+        root.setConfirmed(screenName, path);
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light",
+            ...root.targetArgs(screenName), "--image", path]);
+        root.changed()
+    }
+
+    // Make a monitor show the global wallpaper again
+    function resetScreen(screenName, darkMode = Appearance.m3colors.darkmode) {
+        if (!screenName) return;
+        root.setConfirmed(screenName, "");
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light",
+            ...root.targetArgs(screenName), "--inherit"]);
         root.changed()
     }
 
@@ -81,10 +133,12 @@ Singleton {
         property string filePath: ""
         property bool darkMode: Appearance.m3colors.darkmode
         property var onFileSelected: null
-        function select(filePath, darkMode = Appearance.m3colors.darkmode, onFileSelected = null) {
+        property string screenName: ""
+        function select(filePath, darkMode = Appearance.m3colors.darkmode, onFileSelected = null, screenName = "") {
             selectProc.filePath = filePath
             selectProc.darkMode = darkMode
             selectProc.onFileSelected = onFileSelected
+            selectProc.screenName = screenName
             selectProc.exec(["test", "-d", FileUtils.trimFileProtocol(filePath)])
         }
         onExited: (exitCode, exitStatus) => {
@@ -95,23 +149,23 @@ Singleton {
             if (selectProc.onFileSelected) {
                 selectProc.onFileSelected(selectProc.filePath);
             } else {
-                root.apply(selectProc.filePath, selectProc.darkMode);
+                root.apply(selectProc.filePath, selectProc.darkMode, selectProc.screenName);
             }
         }
     }
 
-    function select(filePath, darkMode = Appearance.m3colors.darkmode, onFileSelected = null) {
-        selectProc.select(filePath, darkMode, onFileSelected);
+    function select(filePath, darkMode = Appearance.m3colors.darkmode, onFileSelected = null, screenName = "") {
+        selectProc.select(filePath, darkMode, onFileSelected, screenName);
     }
 
-    function randomFromCurrentFolder(darkMode = Appearance.m3colors.darkmode) {
+    function randomFromCurrentFolder(darkMode = Appearance.m3colors.darkmode, screenName = "") {
         const count = wallpaperModel.count > 0 ? wallpaperModel.count : folderModel.count;
         if (count === 0) return;
         const randomIndex = Math.floor(Math.random() * count);
         const item = wallpaperModel.count > 0 ? wallpaperModel.get(randomIndex) : null;
         const filePath = item ? item.filePath : folderModel.get(randomIndex, "filePath");
         print("Randomly selected wallpaper:", filePath);
-        if (filePath) root.select(filePath, darkMode);
+        if (filePath) root.select(filePath, darkMode, null, screenName);
     }
 
     function getRandomWallpaperPath(excludePath = "") {
@@ -530,6 +584,16 @@ Singleton {
 
         function apply(path: string): void {
             root.apply(path);
+        }
+
+        // Wallpaper for one monitor (output name, e.g. "DP-1")
+        function applyTo(screen: string, path: string): void {
+            root.apply(path, Appearance.m3colors.darkmode, screen);
+        }
+
+        // Make a monitor use the global wallpaper again
+        function reset(screen: string): void {
+            root.resetScreen(screen);
         }
 
         function setSortMode(mode: string): void {

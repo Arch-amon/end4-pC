@@ -22,7 +22,7 @@ Variants {
             id: backdrop
             screen: loader.modelData
 
-            property string wallpaperPath: Config.options.background.wallpaperPath
+            property string wallpaperPath: ScreenConfig.wallpaperFor(loader.modelData)
 
             WlrLayershell.layer: WlrLayer.Background
             WlrLayershell.namespace: "quickshell:wallpaper"

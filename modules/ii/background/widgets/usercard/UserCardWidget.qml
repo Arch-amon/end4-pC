@@ -239,7 +239,7 @@ AbstractBackgroundWidget {
                     // Only feeds the FastBlur used when widget blur is off
                     property string effectiveSource: Config.options.background.widgets.blurWidgets ? "" : "file://" + (GlobalStates.screenLocked && Config.options.background.lockWall !== ""
                         ? Config.options.background.lockWall
-                        : Config.options.background.wallpaperPath)
+                        : ScreenConfig.wallpaperFor(root.screenName))
 
                     Image {
                         id: bgImageA
@@ -522,7 +522,7 @@ AbstractBackgroundWidget {
 
                         Image {
                             anchors.fill: parent
-                            source: Config.options.sidebar.bannerImage || Config.options.background.wallpaperPath
+                            source: Config.options.sidebar.bannerImage || ScreenConfig.wallpaperFor(root.screenName)
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             cache: false

@@ -86,7 +86,7 @@ MouseArea {
                 // onWallpaperPathChanged to fire with the real transition animation.
                 if (Config.options.background.enableWallpaperPreview)
                     Wallpapers.stopPreview();
-                Wallpapers.select(filePath, root.useDarkMode);
+                Wallpapers.select(filePath, root.useDarkMode, null, GlobalStates.wallpaperSelectorScreen);
             }
         }
     }
@@ -617,11 +617,11 @@ MouseArea {
                                 IconToolbarButton {
                                     implicitWidth: height
                                     onClicked: {
-                                        Wallpapers.openFallbackPicker(root.useDarkMode);
+                                        Wallpapers.openFallbackPicker(root.useDarkMode, "", GlobalStates.wallpaperSelectorScreen);
                                         GlobalStates.wallpaperSelectorOpen = false;
                                     }
                                     altAction: () => {
-                                        Wallpapers.openFallbackPicker(root.useDarkMode);
+                                        Wallpapers.openFallbackPicker(root.useDarkMode, "", GlobalStates.wallpaperSelectorScreen);
                                         GlobalStates.wallpaperSelectorOpen = false;
                                         Config.options.wallpaperSelector.useSystemFileDialog = true;
                                     }
@@ -632,7 +632,7 @@ MouseArea {
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
-                                    onClicked: Wallpapers.randomFromCurrentFolder()
+                                    onClicked: Wallpapers.randomFromCurrentFolder(root.useDarkMode, GlobalStates.wallpaperSelectorScreen)
                                     text: "ifl"
                                     StyledToolTip {
                                         text: Translation.tr("Random wallpaper from current folder")

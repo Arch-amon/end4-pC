@@ -18,9 +18,10 @@ Singleton {
     // Transparency. The quadratic functions were derived from analysis of hand-picked transparency values.
     ColorQuantizer {
         id: wallColorQuant
-        property string wallpaperPath: Config.options.background.wallpaperPath
+        // Sample the wallpaper the color theme follows
+        property string wallpaperPath: ScreenConfig.wallpaperFor(ScreenConfig.themeSourceScreen)
         property bool wallpaperIsVideo: wallpaperPath.endsWith(".mp4") || wallpaperPath.endsWith(".webm") || wallpaperPath.endsWith(".mkv") || wallpaperPath.endsWith(".avi") || wallpaperPath.endsWith(".mov")
-        source: Qt.resolvedUrl(wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath)
+        source: Qt.resolvedUrl(wallpaperIsVideo ? ScreenConfig.thumbnailFor(ScreenConfig.themeSourceScreen) : wallpaperPath)
         depth: 0 // 2^0 = 1 color
         rescaleSize: 10
     }

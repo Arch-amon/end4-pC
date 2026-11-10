@@ -36,11 +36,16 @@ Scope {
             : path
     }
 
+    // Monitor the menu was opened on. Picks from the menu change its own
+    // wallpaper when it has one, the global wallpaper otherwise.
+    readonly property string menuScreenName: GlobalStates.desktopMenuScreen?.name ?? ""
+    readonly property string wallpaperTarget: ScreenConfig.hasOwnWallpaper(root.menuScreenName) ? root.menuScreenName : ""
+
     // Wallpaper folder images
     FolderListModel {
         id: wallpaperFolder
         folder: {
-            const wallPath = Config.options.background.wallpaperPath
+            const wallPath = ScreenConfig.wallpaperFor(root.menuScreenName)
             if (!wallPath || wallPath.length === 0) return ""
             const lastSlash = wallPath.lastIndexOf("/")
             return "file://" + wallPath.substring(0, lastSlash)
@@ -52,7 +57,7 @@ Scope {
     property int carouselExtraCount: 5
     property bool useDarkMode: Appearance.m3colors.darkmode
     property var randomWallpapers: {
-        const current = FileUtils.trimFileProtocol(Config.options.background.wallpaperPath)
+        const current = FileUtils.trimFileProtocol(ScreenConfig.wallpaperFor(root.menuScreenName))
         let all = []
         for (let i = 0; i < wallpaperFolder.count; i++) {
             const fp = FileUtils.trimFileProtocol(wallpaperFolder.get(i, "filePath").toString())
@@ -66,7 +71,7 @@ Scope {
     }
 
     property var carouselModel: {
-        const current = FileUtils.trimFileProtocol(Config.options.background.wallpaperPath)
+        const current = FileUtils.trimFileProtocol(ScreenConfig.wallpaperFor(root.menuScreenName))
         if (!current || current.length === 0) return randomWallpapers.map(p => root.displayPathFor(p))
         return [root.displayPathFor(current), ...randomWallpapers.map(p => root.displayPathFor(p))]
     }
@@ -162,7 +167,7 @@ Scope {
                             anchors.margins: 10
                             model: root.carouselModel
                             onWallpaperSelected: (path) => {
-                                Wallpapers.select(path, Appearance.m3colors.darkmode)
+                                Wallpapers.select(path, Appearance.m3colors.darkmode, null, root.wallpaperTarget)
                                 GlobalStates.desktopMenuOpen = false
                             }
                         }
@@ -270,7 +275,8 @@ Scope {
                                             GlobalStates.desktopMenuOpen = false
                                             Wallpapers.openFallbackPicker(
                                                 Appearance.m3colors.darkmode,
-                                                Config.options.wallpaperSelector.liveWallpapersPath ?? ""
+                                                Config.options.wallpaperSelector.liveWallpapersPath ?? "",
+                                                root.wallpaperTarget
                                             )
                                             break
                                         case "settings":

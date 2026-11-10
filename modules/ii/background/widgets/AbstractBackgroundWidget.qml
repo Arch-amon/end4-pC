@@ -10,6 +10,7 @@ AbstractWidget {
     id: root
 
     required property string configEntryName
+    property string screenName: "" // Monitor the widget is on, for its wallpaper
     required property int screenWidth
     required property int screenHeight
     required property int scaledScreenWidth
@@ -69,8 +70,9 @@ AbstractWidget {
         return onNormalBackground ? Appearance.colors.colOnLayer0 : adaptiveColor;
     }
 
-    property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
-    property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
+    readonly property string shownWallpaper: ScreenConfig.wallpaperFor(root.screenName)
+    property bool wallpaperIsVideo: /\.(mp4|webm|mkv|avi|mov)$/.test(root.shownWallpaper)
+    property string wallpaperPath: wallpaperIsVideo ? ScreenConfig.thumbnailFor(root.screenName) : root.shownWallpaper
     
     onWallpaperPathChanged: refreshPlacementIfNeeded()
     onPlacementStrategyChanged: refreshPlacementIfNeeded()

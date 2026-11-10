@@ -365,7 +365,7 @@ Singleton {
     function apply(name) {
         GlobalStates.settingsOpen = false
         Collage.armEntrance()
-        Wallpapers.confirmedPath = ""
+        Wallpapers.confirmedPaths = ({})
         Wallpapers.previewPath = ""
         Quickshell.execDetached(["bash", Directories.presetsScriptPath, "--apply", name])
     }
@@ -373,7 +373,7 @@ Singleton {
     function applyOnline(name) {
         GlobalStates.settingsOpen = false
         Collage.armEntrance()
-        Wallpapers.confirmedPath = ""
+        Wallpapers.confirmedPaths = ({})
         Wallpapers.previewPath = ""
         Quickshell.execDetached(["bash", Directories.presetsScriptPath, "--apply", name, "--online"])
     }
@@ -402,7 +402,7 @@ Singleton {
     function applyImported(name) {
         GlobalStates.settingsOpen = false
         Collage.armEntrance()
-        Wallpapers.confirmedPath = ""
+        Wallpapers.confirmedPaths = ({})
         Wallpapers.previewPath = ""
         Quickshell.execDetached(["bash", Directories.presetsScriptPath, "--apply", name, "--imported"])
     }
