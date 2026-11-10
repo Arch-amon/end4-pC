@@ -901,6 +901,9 @@ Singleton {
                 property bool showHomePath: true
                 property string userPath: "" // This can be set to any path and it will show up as a quick access in the wallpaper selector"
                 property string liveWallpapersPath: ""
+                // Quick-access wallpaper folders ({ path, name }), in order; the
+                // first opens by default. Empty = the built-in folders.
+                property list<var> folders: []
                 property bool showSearchbar: true
                 property int columns: 4
                 property bool closeAfterSelection: true

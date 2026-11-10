@@ -24,7 +24,65 @@ Singleton {
 
     property alias directory: folderModel.folder
     readonly property string effectiveDirectory: getCleanDirPath(folderModel.folder)
-    property url defaultFolder: Qt.resolvedUrl(`${Directories.pictures}/Wallpapers`)
+    // Quick-access folders of the selector: the configured ones, or the
+    // built-in set while none are configured. The first opens by default.
+    readonly property var builtInFolders: {
+        const pictures = FileUtils.trimFileProtocol(Directories.pictures);
+        const userPath = Config.options.wallpaperSelector.userPath?.trim() ?? "";
+        return [
+            { path: `${pictures}/Wallpapers`, name: "Wallpapers", icon: "wallpaper" },
+            ...(Config.options.policies.weeb ? [{ path: `${pictures}/homework`, name: "Homework", icon: "imagesmode" }] : []),
+            { path: `${pictures}/Random`, name: "Random", icon: "casino" },
+            ...(userPath.length > 0 ? [{ path: userPath, name: root.folderName(userPath), icon: "image" }] : []),
+        ];
+    }
+    readonly property bool hasCustomFolders: (Config.options.wallpaperSelector.folders ?? []).length > 0
+    readonly property var folders: root.hasCustomFolders
+        ? Array.from(Config.options.wallpaperSelector.folders).map(folder => ({
+            path: folder.path,
+            name: folder.name || root.folderName(folder.path),
+            icon: "folder"
+        }))
+        : root.builtInFolders
+    property url defaultFolder: Qt.resolvedUrl(root.folders[0]?.path ?? `${FileUtils.trimFileProtocol(Directories.pictures)}/Wallpapers`)
+
+    function folderName(path) {
+        return FileUtils.trimFileProtocol(path).split("/").filter(part => part.length > 0).pop() ?? path;
+    }
+
+    // Editing starts from what the selector shows, so the first change to
+    // the built-in set turns it into a configured list.
+    function editableFolders() {
+        return root.folders.map(folder => ({ path: FileUtils.trimFileProtocol(folder.path), name: folder.name }));
+    }
+
+    function addFolder(path) {
+        const clean = FileUtils.trimFileProtocol(path).replace(/\/+$/, "") || "/";
+        const list = root.editableFolders();
+        if (list.some(folder => folder.path === clean)) return;
+        list.push({ path: clean, name: root.folderName(clean) });
+        Config.options.wallpaperSelector.folders = list;
+    }
+
+    function removeFolder(index) {
+        const list = root.editableFolders();
+        list.splice(index, 1);
+        // Removing the last one goes back to the built-in folders
+        Config.options.wallpaperSelector.folders = list;
+    }
+
+    function moveFolder(index, delta) {
+        const list = root.editableFolders();
+        const target = index + delta;
+        if (target < 0 || target >= list.length) return;
+        const [folder] = list.splice(index, 1);
+        list.splice(target, 0, folder);
+        Config.options.wallpaperSelector.folders = list;
+    }
+
+    function resetFolders() {
+        Config.options.wallpaperSelector.folders = [];
+    }
     property alias folderModel: folderModel // Expose for direct binding when needed
     property alias wallpaperModel: wallpaperModel
     property string sortMode: Config.options.wallpaperSelector?.sortMode || "custom"
