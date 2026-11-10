@@ -28,9 +28,19 @@ Singleton {
             [ -d "$DIR/end4-pC" ] && mv "$DIR/end4-pC" "$DIR/end4-pC-old"
             mv "$DIR/end4-pC-tmp" "$DIR/end4-pC"
 
+            # Restart under the config name Hyprland uses ($qsConfig), so the
+            # keybinds that check "qs -c $qsConfig" still find the shell.
+            # A hardcoded name made them fall back to fuzzel and co.
+            SHELL_CONFIG="\${qsConfig:-end4-pC}"
+            if [ "$SHELL_CONFIG" != "end4-pC" ]; then
+                echo
+                echo "Note: Hyprland runs the '$SHELL_CONFIG' config, not end4-pC."
+                echo "end4-pC was updated, but '$SHELL_CONFIG' is restarted as it is."
+            fi
+
             killall qs 2>/dev/null || true
             sleep 0.5
-            setsid qs -c end4-pC >/tmp/qs.log 2>&1 < /dev/null &
+            setsid qs -c "$SHELL_CONFIG" >/tmp/qs.log 2>&1 < /dev/null &
             disown
 
             rm -rf "$DIR/end4-pC-old"
