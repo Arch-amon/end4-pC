@@ -8,13 +8,15 @@ BarWidgetSwitcherArea {
     Component.onCompleted: ResourceUsage.consumers++
     Component.onDestruction: ResourceUsage.consumers--
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnSecondaryContainer
     property bool contentColorOverridden: false
     property bool alwaysShowAllResources: false
     horizontalExtraPadding: 12
-    leftExtraPadding: Config.options.bar.resources.style === "text" ? 4 : 0
+    leftExtraPadding: root.barOpts.resources.style === "text" ? 4 : 0
 
-    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    hoverEnabled: !root.barOpts.tooltips.clickToShow
 
     rowDefault: Component {
         RowLayout {
@@ -24,26 +26,26 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "memory"
                 label: "RAM"
-                shown: Config.options.bar.resources.alwaysShowRam
+                shown: root.barOpts.resources.alwaysShowRam
                 percentage: ResourceUsage.memoryUsedPercentage
-                warningThreshold: Config.options.bar.resources.memoryWarningThreshold
+                warningThreshold: root.barOpts.resources.memoryWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "planner_review"
                 label: "CPU"
-                shown: Config.options.bar.resources.alwaysShowCpu
+                shown: root.barOpts.resources.alwaysShowCpu
                 percentage: ResourceUsage.cpuUsage
                 Layout.leftMargin: shown ? 6 : 0
-                warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+                warningThreshold: root.barOpts.resources.cpuWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "thermostat"
                 label: "TMP"
-                shown: Config.options.bar.resources.alwaysShowCpuTemp
+                shown: root.barOpts.resources.alwaysShowCpuTemp
                 percentage: ResourceUsage.cpuTemp / 100
                 Layout.leftMargin: shown ? 6 : 0
             }
@@ -52,7 +54,7 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "hard_drive"
                 label: "DSK"
-                shown: Config.options.bar.resources.alwaysShowDisk
+                shown: root.barOpts.resources.alwaysShowDisk
                 percentage: ResourceUsage.diskUsedPercentage
                 Layout.leftMargin: shown ? 6 : 0
             }
@@ -61,10 +63,10 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "swap_horiz"
                 label: "SWP"
-                shown: Config.options.bar.resources.alwaysShowSwap
+                shown: root.barOpts.resources.alwaysShowSwap
                 percentage: ResourceUsage.swapUsedPercentage
                 Layout.leftMargin: shown ? 6 : 0
-                warningThreshold: Config.options.bar.resources.swapWarningThreshold
+                warningThreshold: root.barOpts.resources.swapWarningThreshold
             }
         }
     }
@@ -77,26 +79,26 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "memory"
                 label: "RAM"
-                shown: Config.options.bar.resources.alwaysShowRam
+                shown: root.barOpts.resources.alwaysShowRam
                 percentage: ResourceUsage.memoryUsedPercentage
-                warningThreshold: Config.options.bar.resources.memoryWarningThreshold
+                warningThreshold: root.barOpts.resources.memoryWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "planner_review"
                 label: "CPU"
-                shown: Config.options.bar.resources.alwaysShowCpu
+                shown: root.barOpts.resources.alwaysShowCpu
                 percentage: ResourceUsage.cpuUsage
                 Layout.leftMargin: shown ? 6 : 0
-                warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+                warningThreshold: root.barOpts.resources.cpuWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "thermostat"
                 label: "TMP"
-                shown: Config.options.bar.resources.alwaysShowCpuTemp
+                shown: root.barOpts.resources.alwaysShowCpuTemp
                 percentage: ResourceUsage.cpuTemp / 100
                 Layout.leftMargin: shown ? 6 : 0
             }
@@ -105,7 +107,7 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "hard_drive"
                 label: "DSK"
-                shown: Config.options.bar.resources.alwaysShowDisk
+                shown: root.barOpts.resources.alwaysShowDisk
                 percentage: ResourceUsage.diskUsedPercentage
                 Layout.leftMargin: shown ? 6 : 0
             }
@@ -114,10 +116,10 @@ BarWidgetSwitcherArea {
                 contentColorOverridden: root.contentColorOverridden
                 iconName: "swap_horiz"
                 label: "SWP"
-                shown: Config.options.bar.resources.alwaysShowSwap
+                shown: root.barOpts.resources.alwaysShowSwap
                 percentage: ResourceUsage.swapUsedPercentage
                 Layout.leftMargin: shown ? 6 : 0
-                warningThreshold: Config.options.bar.resources.swapWarningThreshold
+                warningThreshold: root.barOpts.resources.swapWarningThreshold
             }
         }
     }
@@ -132,9 +134,9 @@ BarWidgetSwitcherArea {
                 iconName: "memory"
                 label: "RAM"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowRam
+                visible: root.barOpts.resources.alwaysShowRam
                 percentage: ResourceUsage.memoryUsedPercentage
-                warningThreshold: Config.options.bar.resources.memoryWarningThreshold
+                warningThreshold: root.barOpts.resources.memoryWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
@@ -143,9 +145,9 @@ BarWidgetSwitcherArea {
                 iconName: "planner_review"
                 label: "CPU"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowCpu
+                visible: root.barOpts.resources.alwaysShowCpu
                 percentage: ResourceUsage.cpuUsage
-                warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+                warningThreshold: root.barOpts.resources.cpuWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
@@ -154,7 +156,7 @@ BarWidgetSwitcherArea {
                 iconName: "thermostat"
                 label: "TMP"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowCpuTemp
+                visible: root.barOpts.resources.alwaysShowCpuTemp
                 percentage: ResourceUsage.cpuTemp / 100
             }
             Resource {
@@ -164,7 +166,7 @@ BarWidgetSwitcherArea {
                 iconName: "hard_drive"
                 label: "DSK"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowDisk
+                visible: root.barOpts.resources.alwaysShowDisk
                 percentage: ResourceUsage.diskUsedPercentage
             }
             Resource {
@@ -174,9 +176,9 @@ BarWidgetSwitcherArea {
                 iconName: "swap_horiz"
                 label: "SWP"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowSwap
+                visible: root.barOpts.resources.alwaysShowSwap
                 percentage: ResourceUsage.swapUsedPercentage
-                warningThreshold: Config.options.bar.resources.swapWarningThreshold
+                warningThreshold: root.barOpts.resources.swapWarningThreshold
             }
         }
     }
@@ -191,9 +193,9 @@ BarWidgetSwitcherArea {
                 iconName: "memory"
                 label: "RAM"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowRam
+                visible: root.barOpts.resources.alwaysShowRam
                 percentage: ResourceUsage.memoryUsedPercentage
-                warningThreshold: Config.options.bar.resources.memoryWarningThreshold
+                warningThreshold: root.barOpts.resources.memoryWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
@@ -202,9 +204,9 @@ BarWidgetSwitcherArea {
                 iconName: "planner_review"
                 label: "CPU"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowCpu
+                visible: root.barOpts.resources.alwaysShowCpu
                 percentage: ResourceUsage.cpuUsage
-                warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+                warningThreshold: root.barOpts.resources.cpuWarningThreshold
             }
             Resource {
                 contentColor: root.contentColor
@@ -213,7 +215,7 @@ BarWidgetSwitcherArea {
                 iconName: "thermostat"
                 label: "TMP"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowCpuTemp
+                visible: root.barOpts.resources.alwaysShowCpuTemp
                 percentage: ResourceUsage.cpuTemp / 100
             }
             Resource {
@@ -223,7 +225,7 @@ BarWidgetSwitcherArea {
                 iconName: "hard_drive"
                 label: "DSK"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowDisk
+                visible: root.barOpts.resources.alwaysShowDisk
                 percentage: ResourceUsage.diskUsedPercentage
             }
             Resource {
@@ -233,9 +235,9 @@ BarWidgetSwitcherArea {
                 iconName: "swap_horiz"
                 label: "SWP"
                 vertical: true
-                visible: Config.options.bar.resources.alwaysShowSwap
+                visible: root.barOpts.resources.alwaysShowSwap
                 percentage: ResourceUsage.swapUsedPercentage
-                warningThreshold: Config.options.bar.resources.swapWarningThreshold
+                warningThreshold: root.barOpts.resources.swapWarningThreshold
             }
         }
     }

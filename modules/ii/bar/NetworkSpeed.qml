@@ -6,6 +6,8 @@ import qs.modules.common.widgets
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
 
@@ -21,7 +23,7 @@ MouseArea {
     implicitWidth: vertical ? 36 : speedColumn.implicitWidth + 8
     implicitHeight: vertical ? speedColumn.implicitHeight + 6 : 32
 
-    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    hoverEnabled: !root.barOpts.tooltips.clickToShow
 
     function formatRate(rate, compact) {
         const units = compact

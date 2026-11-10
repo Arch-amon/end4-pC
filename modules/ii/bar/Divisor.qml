@@ -4,14 +4,16 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer0
     property bool contentColorOverridden: false
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: root.barOpts.vertical
     property real btnSize: 40
     property real btnSpacing: 2
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    property string style: Config.options.bar.divider.style // "rect" - "dot" - "space"
-    property int dividerSpacing: Config.options.bar.divider.spacing
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
+    property string style: root.barOpts.divider.style // "rect" - "dot" - "space"
+    property int dividerSpacing: root.barOpts.divider.spacing
 
     width:  vertical ? btnSize : (root.style === "space" ? root.dividerSpacing : root.style === "dot" ? dotText.implicitWidth + 10 : (1 + btnSpacing * 3))
     height: vertical ? (root.style === "space" ? root.dividerSpacing : root.style === "dot" ? dotText.implicitHeight - 4 : (1 + btnSpacing * 3)) : btnSize

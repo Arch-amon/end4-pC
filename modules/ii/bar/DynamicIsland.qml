@@ -13,6 +13,8 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property bool mirrored: false
 
     readonly property real pillHeight: 32
@@ -32,8 +34,8 @@ Item {
     readonly property real batteryWidth: 170
     readonly property real badgeSize: 32
     readonly property real badgeSpacing: 6
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    property bool vertical: Config.options.bar.vertical
+    readonly property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
+    property bool vertical: root.barOpts.vertical
 
     property string manualFocusId: ""
 
@@ -257,8 +259,8 @@ Item {
         anchors.left: parent.left
         width: root.displayedProvider?.width ?? root.idleWidth
         height: root.pillHeight
-        color: root.isMaterial || (GlobalStates.barCenterOnly && Config.options.bar.cornerStyle === 0) ? "transparent" : Config.options.bar.followFrameColor
-            ? Appearance.getColorFromName(Config.options.bar.frameColor)
+        color: root.isMaterial || (ScreenConfig.isCenterOnly(root.barOpts) && root.barOpts.cornerStyle === 0) ? "transparent" : root.barOpts.followFrameColor
+            ? Appearance.getColorFromName(root.barOpts.frameColor)
             : Appearance.colors.colUiBackground
         radius: height / 2
         clip: true

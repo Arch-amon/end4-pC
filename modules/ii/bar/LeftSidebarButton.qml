@@ -7,12 +7,14 @@ import qs.modules.common.functions
 
 RippleButton {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property bool showPing: false
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: root.barOpts.vertical
     property bool aiChatEnabled: Config.options.policies.ai !== 0
     property bool translatorEnabled: Config.options.sidebar.translator.enable
     property bool animeEnabled: Config.options.policies.weeb !== 0
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     property real buttonPadding: 5
     readonly property color iconColor: {
         const name = Config.options.custom.iconColor || "onLayer0"

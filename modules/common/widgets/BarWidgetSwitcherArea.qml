@@ -4,8 +4,10 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property bool vertical: false
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     property real horizontalExtraPadding: 12
     property real leftExtraPadding: 0
 
@@ -15,11 +17,11 @@ MouseArea {
     property Component rowMaterial
 
     implicitWidth: root.vertical
-        ? Appearance.sizes.verticalBarWidth
+        ? ScreenConfig.verticalBarWidthFor(root.barOpts)
         : (rowLoader.item?.implicitWidth ?? 0) + (root.isMaterial ? 0 : root.horizontalExtraPadding) + root.leftExtraPadding
     implicitHeight: root.vertical
         ? (colLoader.item?.implicitHeight ?? 0)
-        : Appearance.sizes.barHeight
+        : ScreenConfig.barHeightFor(root.barOpts)
 
     Loader {
         id: colLoader

@@ -60,11 +60,11 @@ Item {
         const a = w.anchors
         const m = w.margins
         const pushed = w.exclusionMode !== ExclusionMode.Ignore
-        const x = a?.left ? (m?.left ?? 0) + (pushed ? GlassLayers.leftZone : 0)
-            : a?.right ? s.width - w.width - (m?.right ?? 0) - (pushed ? GlassLayers.rightZone : 0)
+        const x = a?.left ? (m?.left ?? 0) + (pushed ? GlassLayers.zoneFor(s.name, "left") : 0)
+            : a?.right ? s.width - w.width - (m?.right ?? 0) - (pushed ? GlassLayers.zoneFor(s.name, "right") : 0)
             : (s.width - w.width) / 2
-        const y = a?.top ? (m?.top ?? 0) + (pushed ? GlassLayers.topZone : 0)
-            : a?.bottom ? s.height - w.height - (m?.bottom ?? 0) - (pushed ? GlassLayers.bottomZone : 0)
+        const y = a?.top ? (m?.top ?? 0) + (pushed ? GlassLayers.zoneFor(s.name, "top") : 0)
+            : a?.bottom ? s.height - w.height - (m?.bottom ?? 0) - (pushed ? GlassLayers.zoneFor(s.name, "bottom") : 0)
             : (s.height - w.height) / 2
         return layerOffset(w, s, Qt.point(x, y))
     }

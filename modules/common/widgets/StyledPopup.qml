@@ -12,22 +12,21 @@ import Quickshell.Wayland
 LazyLoader {
     id: root
     property Item hoverTarget
+    // Bar settings of the monitor the popup's anchor is on
+    readonly property var barOpts: ScreenConfig.barOf(root.hoverTarget)
     default property Item contentItem
     property real popupBackgroundMargin: 0
-    readonly property bool shouldShow: root.hoverTarget && root.hoverTarget.containsMouse && Config.options.bar.tooltips.enable && !GlobalStates.barStyleEditorOpen
-        && (!Config.options.bar.tooltips.clickToShow || ((root.hoverTarget.pressedButtons ?? Qt.LeftButton) & Qt.LeftButton))
+    readonly property bool shouldShow: root.hoverTarget && root.hoverTarget.containsMouse && root.barOpts.tooltips.enable && !GlobalStates.barStyleEditorOpen
+        && (!root.barOpts.tooltips.clickToShow || ((root.hoverTarget.pressedButtons ?? Qt.LeftButton) & Qt.LeftButton))
     property bool closing: false
     active: root.shouldShow || root.closing
     onShouldShowChanged: if (!root.shouldShow && root.item) root.closing = true
 
-    readonly property bool barVertical: Config.options.bar.vertical
-    readonly property string barEdge: {
-        if (!barVertical) return Config.options.bar.bottom ? "bottom" : "top"
-        return Config.options.bar.bottom ? "right" : "left"
-    }
-    readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
+    readonly property bool barVertical: root.barOpts.vertical
+    readonly property string barEdge: ScreenConfig.barEdgeFor(root.barOpts)
+    readonly property real barThickness: barVertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : ScreenConfig.barHeightFor(root.barOpts)
     readonly property real bounceRoom: 24
-    readonly property bool morph: Config.options.bar.tooltips.style === "morph"
+    readonly property bool morph: root.barOpts.tooltips.style === "morph"
     readonly property real filletRadius: 10
     readonly property var group: root.findGroup(root.hoverTarget)
 

@@ -7,14 +7,32 @@ import Quickshell.Io
 Singleton {
     id: root
     property var layers: ({})
-    property real barZone: 0
-    property string barEdge: "top"
+    // Space reserved by each monitor's bar: output name -> { edge, size }
+    property var barZones: ({})
     property real dockZone: 0
     property string dockEdge: "bottom"
-    readonly property real topZone: (barEdge === "top" ? barZone : 0) + (dockEdge === "top" ? dockZone : 0)
-    readonly property real bottomZone: (barEdge === "bottom" ? barZone : 0) + (dockEdge === "bottom" ? dockZone : 0)
-    readonly property real leftZone: (barEdge === "left" ? barZone : 0) + (dockEdge === "left" ? dockZone : 0)
-    readonly property real rightZone: (barEdge === "right" ? barZone : 0) + (dockEdge === "right" ? dockZone : 0)
+
+    function setBarZone(screenName, edge, size) {
+        if (!screenName) return;
+        const current = root.barZones[screenName];
+        if (current && current.edge === edge && current.size === size) return;
+        const zones = Object.assign({}, root.barZones);
+        zones[screenName] = { edge: edge, size: size };
+        root.barZones = zones;
+    }
+
+    function clearBarZone(screenName) {
+        if (!(screenName in root.barZones)) return;
+        const zones = Object.assign({}, root.barZones);
+        delete zones[screenName];
+        root.barZones = zones;
+    }
+
+    // Space reserved along `edge` ("top", "bottom", "left", "right") of a monitor
+    function zoneFor(screenName, edge) {
+        const bar = root.barZones[screenName];
+        return (bar && bar.edge === edge ? bar.size : 0) + (root.dockEdge === edge ? root.dockZone : 0);
+    }
 
     function refresh() {
         debounce.restart()

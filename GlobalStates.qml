@@ -54,7 +54,6 @@ Singleton {
     property real dropShelfX: 0
     property real dropShelfY: 0
     property string osdIndicatorType: "volume"
-    property bool barCenterOnly: false
     property int dashboardPage: 0
     property string dashboardGroup: ""
     property var frameHover: ({})
@@ -77,9 +76,9 @@ Singleton {
         onTriggered: root.startupLockPending = false
     }
 
-    readonly property bool dynamicIslandEnabled: Config.options.bar.layouts.leftLayout.includes("dynamicIsland")
-        || Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
-        || Config.options.bar.layouts.rightLayout.includes("dynamicIsland")
+    // Some shown bar has a dynamic island (it takes over notifications/OSD).
+    // Per-monitor checks use ScreenConfig.barHasWidget() instead.
+    readonly property bool dynamicIslandEnabled: ScreenConfig.anyBar(bar => ScreenConfig.barHasWidget(bar, "dynamicIsland"))
 
     signal centeredWallpaperThumpRequested()
 

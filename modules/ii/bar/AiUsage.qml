@@ -6,6 +6,8 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
     property bool vertical: false
@@ -19,9 +21,9 @@ MouseArea {
     }
 
     visible: providers.length > 0
-    implicitWidth: providers.length === 0 ? 0 : (vertical ? Appearance.sizes.verticalBarWidth : content.implicitWidth + 12)
-    implicitHeight: providers.length === 0 ? 0 : (vertical ? content.implicitHeight + 10 : Appearance.sizes.barHeight)
-    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    implicitWidth: providers.length === 0 ? 0 : (vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : content.implicitWidth + 12)
+    implicitHeight: providers.length === 0 ? 0 : (vertical ? content.implicitHeight + 10 : ScreenConfig.barHeightFor(root.barOpts))
+    hoverEnabled: !root.barOpts.tooltips.clickToShow
 
     GridLayout {
         id: content

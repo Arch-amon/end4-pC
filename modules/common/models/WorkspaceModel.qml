@@ -10,6 +10,7 @@ NestableObject {
 
     required property var screen
     readonly property string monitorName: screen?.name ?? ""
+    readonly property var barOpts: C.ScreenConfig.barFor(screen)
 
     readonly property var hyprMonitor: WM.compositor === "hyprland" ? Hyprland.monitorFor(screen) : null
     readonly property var liveMonitorData: WM.compositor === "hyprland"
@@ -17,7 +18,7 @@ NestableObject {
         : null
 
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
-    readonly property int shownCount: C.Config.options.bar.workspaces.shown
+    readonly property int shownCount: root.barOpts.workspaces.shown
 
     readonly property int activeNumber: {
         if (WM.compositor === "hyprland")
@@ -43,7 +44,7 @@ NestableObject {
     readonly property string specialWorkspaceName: specialWorkspaceActive ? (specialWorkspace.name.replace("special:", "") || "special") : ""
 
     property list<bool> occupied: []
-    readonly property bool shouldShowAppIcons: (C.Config.options.bar?.workspaces?.style ?? "default") === "default" && Boolean(C.Config.options.bar?.workspaces?.showAppIcons || C.Config.options.bar?.workspaces?.indicatorStyle === "icon")
+    readonly property bool shouldShowAppIcons: (root.barOpts?.workspaces?.style ?? "default") === "default" && Boolean(root.barOpts?.workspaces?.showAppIcons || root.barOpts?.workspaces?.indicatorStyle === "icon")
     property list<var> biggestWindow: shouldShowAppIcons ? occupied.map((_, index) => {
         const number = getWorkspaceIdAt(index)
         return root.biggestWindowForNumber(number)

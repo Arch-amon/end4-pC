@@ -6,14 +6,16 @@ import qs.modules.common.widgets
 
 MaterialSymbol {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
-    readonly property bool showUnreadCount: Config.options.bar.indicators.notifications.showUnreadCount
-    readonly property bool isDi: GlobalStates.dynamicIslandEnabled && Config.options.bar.dynamicIsland.rightWidget === "systemIcons"
+    readonly property bool showUnreadCount: root.barOpts.indicators.notifications.showUnreadCount
+    readonly property bool isDi: ScreenConfig.barHasWidget(root.barOpts, "dynamicIsland") && root.barOpts.dynamicIsland.rightWidget === "systemIcons"
 
     text: Notifications.silent ? "notifications_paused" : "notifications"
     iconSize: Appearance.font.pixelSize.larger
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     readonly property bool glassy: Config.options.background.widgets.glass.enable
     color: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? (root.glassy ? Appearance.colors.colOnLayer0 : Appearance.colors.colOnPrimary) : Appearance.colors.colOnLayer1))
 

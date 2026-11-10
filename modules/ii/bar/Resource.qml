@@ -6,6 +6,8 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnSecondaryContainer
     property bool contentColorOverridden: false
     required property string iconName
@@ -16,8 +18,8 @@ Item {
     property bool shown: true
     clip: !vertical
     visible: vertical ? true : width > 0 && height > 0
-    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : (resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth)
-    implicitHeight: vertical ? resourceProgress.implicitHeight : Appearance.sizes.barHeight
+    implicitWidth:  vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : (resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth)
+    implicitHeight: vertical ? resourceProgress.implicitHeight : ScreenConfig.barHeightFor(root.barOpts)
     property bool warning: percentage * 100 >= warningThreshold
     readonly property real usage: Math.max(0, Math.min(1, percentage))
     property color usageColor: {
@@ -27,7 +29,7 @@ Item {
         return ColorUtils.mix(Appearance.colors.colTertiary, Appearance.colors.colPrimary, blend)
     }
     readonly property Component styleComponent: {
-        switch (Config.options.bar.resources.style) {
+        switch (root.barOpts.resources.style) {
         case "filled": return filledStyle
         case "text": return textStyle
         default: return outlineStyle
@@ -138,7 +140,7 @@ Item {
 
         Item {
             Layout.alignment: Qt.AlignVCenter
-            visible: Config.options.bar.resources.showValue
+            visible: root.barOpts.resources.showValue
             implicitWidth: visible ? fullPercentageTextMetrics.width : 0
             implicitHeight: percentageText.implicitHeight
             TextMetrics {

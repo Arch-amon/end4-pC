@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import Quickshell.Services.SystemTray
 
 /**
  * Per-monitor settings on top of the global config.
@@ -105,6 +106,19 @@ Singleton {
         if (!layouts) return false;
         return [layouts.leftLayout, layouts.middleLayout, layouts.rightLayout]
             .some(layout => Array.from(layout ?? []).includes(widgetName));
+    }
+
+    // A bar with only its middle section (an empty tray doesn't count).
+    function isCenterOnly(bar) {
+        const trayEmpty = SystemTray.items.values.length === 0;
+        const shown = layout => Array.from(layout ?? []).filter(name => !(trayEmpty && name === "sysTray"));
+        return shown(bar?.layouts?.leftLayout).length === 0 && shown(bar?.layouts?.rightLayout).length === 0;
+    }
+
+    // Which screen edge a bar sits on: "top", "bottom", "left" or "right".
+    function barEdgeFor(bar) {
+        if (bar?.vertical) return bar.bottom ? "right" : "left";
+        return bar?.bottom ? "bottom" : "top";
     }
 
     // Give `screen` its own bar, starting as a copy of `from` (another

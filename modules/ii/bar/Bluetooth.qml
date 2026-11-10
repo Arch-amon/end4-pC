@@ -7,12 +7,14 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
     signal styleEditorRequested()
 
     property bool vertical: false
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     property bool hovered: containsMouse
     readonly property var screen: root.QsWindow?.window?.screen
     readonly property int screenWidth: screen?.width ?? 1920
@@ -33,15 +35,15 @@ MouseArea {
     readonly property string percentageText: `${Math.round(batteryPercentage * 100)}%`
 
     visible: BluetoothStatus.available
-    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    hoverEnabled: !root.barOpts.tooltips.clickToShow
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     cursorShape: Qt.PointingHandCursor
     implicitWidth: vertical
-        ? Appearance.sizes.verticalBarWidth
+        ? ScreenConfig.verticalBarWidthFor(root.barOpts)
         : Math.max(contentLoader.item?.implicitWidth ?? 0, Appearance.font.pixelSize.larger) + 8
     implicitHeight: vertical
         ? Math.max(contentLoader.item?.implicitHeight ?? 0, Appearance.font.pixelSize.larger)
-        : Appearance.sizes.barHeight
+        : ScreenConfig.barHeightFor(root.barOpts)
 
     onPressAndHold: mouse => {
         if (mouse.button === Qt.RightButton) root.styleEditorRequested();

@@ -13,13 +13,15 @@ import Quickshell.Widgets
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     signal styleEditorRequested()
 
     property real iconSize:      23
     property real btnSize:       28
     property real btnSpacing:    2
-    property bool vertical:    Config.options.bar.vertical
-    property bool isMaterial:  Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool vertical:    root.barOpts.vertical
+    property bool isMaterial:  root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     property var pinnedApps: Config.options?.dock.pinnedApps ?? []
     property var activeUnpinned: TaskbarApps.apps.filter(
         a => !a.pinned && a.appId !== "SEPARATOR" && a.toplevels.length > 0
@@ -162,11 +164,11 @@ Item {
     }
 
     implicitWidth:  vertical
-        ? (isMaterial ? Appearance.sizes.verticalBarWidth : Appearance.sizes.verticalBarWidth - 10)
+        ? (isMaterial ? ScreenConfig.verticalBarWidthFor(root.barOpts) : ScreenConfig.verticalBarWidthFor(root.barOpts) - 10)
         : pill.implicitWidth
     implicitHeight: vertical
         ? pill.implicitHeight
-        : Appearance.sizes.barHeight
+        : ScreenConfig.barHeightFor(root.barOpts)
 
     function swapSlots(from, to) {
         if (from === to) return
@@ -190,7 +192,7 @@ Item {
         implicitWidth: root.isMaterial && !root.vertical
             ? flow.implicitWidth + 10
             : root.vertical
-                ? (root.isMaterial ? 32 : Appearance.sizes.verticalBarWidth - 10)
+                ? (root.isMaterial ? 32 : ScreenConfig.verticalBarWidthFor(root.barOpts) - 10)
                 : flow.implicitWidth + 4
 
         implicitHeight: root.isMaterial && root.vertical
@@ -199,7 +201,7 @@ Item {
                 ? 32
                 : root.vertical
                     ? flow.implicitHeight + 4
-                    : Appearance.sizes.barHeight
+                    : ScreenConfig.barHeightFor(root.barOpts)
 
         Behavior on implicitWidth {
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

@@ -14,6 +14,8 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer0
     property bool contentColorOverridden: false
     property bool vertical: false
@@ -43,8 +45,8 @@ Item {
         console.log("iconPath:", root.mainAppIconSource)
     }
 
-    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : Math.min(colLayout.implicitWidth + 12, 280)
-    implicitHeight: vertical ? iconItem.implicitHeight : Appearance.sizes.barHeight
+    implicitWidth:  vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : Math.min(colLayout.implicitWidth + 12, 280)
+    implicitHeight: vertical ? iconItem.implicitHeight : ScreenConfig.barHeightFor(root.barOpts)
 
     // Vertical
     Item {

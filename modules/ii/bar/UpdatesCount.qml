@@ -10,15 +10,17 @@ import Quickshell.Io
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
     signal styleEditorRequested()
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    property bool borderless: Config.options.bar.borderless
+    property bool vertical: root.barOpts.vertical
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
+    property bool borderless: root.barOpts.borderless
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (contentLoader.item?.implicitWidth ?? 0) 
-    implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
+    implicitWidth: vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : (contentLoader.item?.implicitWidth ?? 0) 
+    implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : ScreenConfig.barHeightFor(root.barOpts)
 
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton

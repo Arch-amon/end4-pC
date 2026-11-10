@@ -7,11 +7,13 @@ import Quickshell
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property bool vertical: false
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : avatar.width + (root.isMaterial ? 0 : 8)
-    implicitHeight: vertical ? avatar.height + 8 : Appearance.sizes.barHeight
+    implicitWidth: vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : avatar.width + (root.isMaterial ? 0 : 8)
+    implicitHeight: vertical ? avatar.height + 8 : ScreenConfig.barHeightFor(root.barOpts)
 
     UserAvatar {
         id: avatar
@@ -44,12 +46,12 @@ Item {
             anchor {
                 window: root.QsWindow.window
                 item: root
-                gravity: Config.options.bar.vertical
-                    ? (Config.options.bar.bottom ? Edges.Left : Edges.Right)
-                    : (Config.options.bar.bottom ? Edges.Top : Edges.Bottom)
-                edges: Config.options.bar.vertical
-                    ? (Config.options.bar.bottom ? Edges.Left : Edges.Right)
-                    : (Config.options.bar.bottom ? Edges.Top : Edges.Bottom)
+                gravity: root.barOpts.vertical
+                    ? (root.barOpts.bottom ? Edges.Left : Edges.Right)
+                    : (root.barOpts.bottom ? Edges.Top : Edges.Bottom)
+                edges: root.barOpts.vertical
+                    ? (root.barOpts.bottom ? Edges.Left : Edges.Right)
+                    : (root.barOpts.bottom ? Edges.Top : Edges.Bottom)
             }
             onPopupClosed: popup.active = false
         }

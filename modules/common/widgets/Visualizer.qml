@@ -9,8 +9,10 @@ import qs.modules.common.widgets
 
 Item {
     id: root
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
+    property bool vertical: root.barOpts.vertical
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     property bool mirrored: false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property bool isPlaying: activePlayer?.isPlaying ?? false
@@ -19,13 +21,13 @@ Item {
     property real dotSize: 3
     property real dotSpacing: 3
     property real maxBarHeight: (vertical
-        ? Appearance.sizes.verticalBarWidth
-        : Appearance.sizes.barHeight) * 0.7
+        ? ScreenConfig.verticalBarWidthFor(root.barOpts)
+        : ScreenConfig.barHeightFor(root.barOpts)) * 0.7
     property real maxVisualizerValue: 1000
     property color barColor: Appearance.colors.colPrimary
 
     implicitWidth: vertical
-        ? Appearance.sizes.verticalBarWidth
+        ? ScreenConfig.verticalBarWidthFor(root.barOpts)
         : (isMaterial
             ? barsRow.implicitWidth + 16
             : barCount * (dotSize + dotSpacing))
@@ -33,7 +35,7 @@ Item {
         ? (isMaterial
             ? barsColumn.implicitHeight + 16
             : barCount * (dotSize + dotSpacing))
-        : Appearance.sizes.barHeight
+        : ScreenConfig.barHeightFor(root.barOpts)
 
     transform: Scale {
         xScale: !root.vertical && root.mirrored ? -1 : 1

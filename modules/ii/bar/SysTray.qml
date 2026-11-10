@@ -9,6 +9,8 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer2
     property bool contentColorOverridden: false
     signal styleEditorRequested()
@@ -18,12 +20,12 @@ Item {
     property bool showSeparator: true
     property bool showOverflowMenu: true
     property var activeMenu: null
-    readonly property bool isOnLeft: Config.options.bar.layouts.leftLayout.includes("sysTray")
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property bool isOnLeft: root.barOpts.layouts.leftLayout.includes("sysTray")
+    readonly property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
 
     visible: SystemTray.items.values.length > 0
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth - 4 : gridLayout.implicitWidth)
-    implicitHeight: vertical ? gridLayout.implicitHeight + 6 : Appearance.sizes.barHeight
+    implicitWidth: vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : (isMaterial ? pill.implicitWidth - 4 : gridLayout.implicitWidth)
+    implicitHeight: vertical ? gridLayout.implicitHeight + 6 : ScreenConfig.barHeightFor(root.barOpts)
 
     property list<var> pinnedItems: TrayService.pinnedItems
     property list<var> unpinnedItems: TrayService.unpinnedItems
@@ -95,7 +97,7 @@ Item {
             contentItem: MaterialSymbol {
                 anchors.centerIn: parent
                 iconSize: Appearance.font.pixelSize.larger
-                text: Config.options.bar.bottom ? "keyboard_control_key" : "expand_more"
+                text: root.barOpts.bottom ? "keyboard_control_key" : "expand_more"
                 horizontalAlignment: Text.AlignHCenter
                 color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : root.contentColor
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)

@@ -8,11 +8,13 @@ import QtQuick
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
 
     required property var host
     required property var model
 
-    readonly property string style: Config.options.bar.workspaces.style
+    readonly property string style: root.barOpts.workspaces.style
     readonly property bool vertical: root.host.vertical
     readonly property real slot: root.host.slotLength
     readonly property int count: root.model.shownCount

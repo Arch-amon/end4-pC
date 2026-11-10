@@ -9,12 +9,14 @@ import qs.modules.common.widgets
 
 Item {
     id: diIdleRoot
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(diIdleRoot)
     required property Item di
     anchors.fill: parent
 
     readonly property bool systemIconsElsewhere:
-        Config.options.bar.layouts.leftLayout.includes("systemIcons")
-        || Config.options.bar.layouts.rightLayout.includes("systemIcons")
+        diIdleRoot.barOpts.layouts.leftLayout.includes("systemIcons")
+        || diIdleRoot.barOpts.layouts.rightLayout.includes("systemIcons")
 
     Rectangle {
         id: avatarRect
@@ -128,7 +130,7 @@ Item {
 
         Loader {
             Layout.alignment: Qt.AlignVCenter
-            sourceComponent: Config.options.bar.dynamicIsland.leftWidget === "clockWidget" ? weatherComponent : clockComponent
+            sourceComponent: diIdleRoot.barOpts.dynamicIsland.leftWidget === "clockWidget" ? weatherComponent : clockComponent
 
             Component {
                 id: clockComponent

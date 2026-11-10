@@ -10,13 +10,15 @@ import qs.modules.common.functions
 
 Item {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
-    property bool borderless: Config.options.bar.borderless
-    property bool showDate: Config.options.bar.verbose
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    property bool isDi: GlobalStates.dynamicIslandEnabled && Config.options.bar.dynamicIsland.rightWidget === "systemIcons" 
+    property bool borderless: root.barOpts.borderless
+    property bool showDate: root.barOpts.verbose
+    property bool vertical: root.barOpts.vertical
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
+    property bool isDi: ScreenConfig.barHasWidget(root.barOpts, "dynamicIsland") && root.barOpts.dynamicIsland.rightWidget === "systemIcons" 
 
     readonly property color iconColor: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? (Config.options.background.widgets.glass.enable ? Appearance.colors.colOnLayer0 : Appearance.colors.colOnPrimary) : Appearance.colors.colOnLayer1))
 

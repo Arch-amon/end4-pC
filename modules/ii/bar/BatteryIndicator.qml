@@ -5,31 +5,33 @@ import QtQuick
 
 MouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnSecondaryContainer
     property bool contentColorOverridden: false
     property bool vertical: false
-    property bool borderless: Config.options.bar.borderless
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool borderless: root.barOpts.borderless
+    property bool isMaterial: root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
     readonly property real percentage: Battery.percentage
     readonly property bool isLow: percentage <= Config.options.battery.low / 100
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : glyph.implicitWidth + 8
-    implicitHeight: vertical ? glyph.implicitHeight + 8 : Appearance.sizes.barHeight
+    implicitWidth: vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : glyph.implicitWidth + 8
+    implicitHeight: vertical ? glyph.implicitHeight + 8 : ScreenConfig.barHeightFor(root.barOpts)
 
-    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    hoverEnabled: !root.barOpts.tooltips.clickToShow
 
     BatteryGlyph {
         id: glyph
         anchors.centerIn: parent
-        style: Config.options.bar.battery.style
+        style: root.barOpts.battery.style
         percentage: root.percentage
         isCharging: root.isCharging
         isLow: root.isLow
-        showPercentage: Config.options.bar.battery.showPercentage
-        showCharging: Config.options.bar.battery.showCharging
+        showPercentage: root.barOpts.battery.showPercentage
+        showCharging: root.barOpts.battery.showCharging
         vertical: root.vertical
         contentColor: root.contentColor
     }

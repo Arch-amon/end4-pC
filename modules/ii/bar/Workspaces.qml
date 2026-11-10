@@ -12,6 +12,8 @@ import Quickshell
 
 ButtonMouseArea {
     id: root
+    // Bar settings of the monitor this widget is on
+    readonly property var barOpts: ScreenConfig.barOf(root)
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
     signal styleEditorRequested()
@@ -21,10 +23,10 @@ ButtonMouseArea {
         screen: root.QsWindow.window?.screen
     }
 
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: root.barOpts.vertical
     property bool superPressAndHeld: false // Relevant modifications at bottom of file
 
-    property real workspaceButtonWidth: (Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4) ? 30 : 26
+    property real workspaceButtonWidth: (root.barOpts.cornerStyle === 3 || root.barOpts.cornerStyle === 4) ? 30 : 26
     property real activeWorkspaceMargin: 2
     property real activeWorkspaceSize: workspaceButtonWidth - activeWorkspaceMargin * 2
     property real workspaceIconSize: workspaceButtonWidth * 0.69
@@ -32,7 +34,7 @@ ButtonMouseArea {
     property real workspaceIconOpacityShrinked: 1
     property real workspaceIconMarginShrinked: -4
     property int workspaceIndexInGroup: (wsModel.activeNumber - 1) % wsModel.shownCount
-    readonly property string style: Config.options.bar.workspaces.style ?? "default"
+    readonly property string style: root.barOpts.workspaces.style ?? "default"
     readonly property bool altStyle: root.style !== "default"
     readonly property real slotLength: root.style === "gnome" ? 16 : root.style === "dots" ? 24 : root.style === "ticks" ? 16 : root.workspaceButtonWidth
     property real specialTextSize: workspaceButtonWidth * 0.5
@@ -40,7 +42,7 @@ ButtonMouseArea {
     Layout.alignment: vertical ? Qt.AlignHCenter : Qt.AlignVCenter
     Layout.fillWidth: vertical
     Layout.fillHeight: !vertical
-    readonly property real barThickness: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
+    readonly property real barThickness: vertical ? ScreenConfig.verticalBarWidthFor(root.barOpts) : ScreenConfig.barHeightFor(root.barOpts)
     implicitWidth: vertical ? barThickness : (altStyle ? (altLoader.item?.implicitWidth ?? 0) : occupiedIndicators.implicitWidth)
     implicitHeight: vertical ? (altStyle ? (altLoader.item?.implicitHeight ?? 0) : occupiedIndicators.implicitHeight) : barThickness
 
@@ -245,7 +247,7 @@ ButtonMouseArea {
 
                     AppIcon {
                         id: appIcon
-                        property real cornerMargin: (!root.superPressAndHeld && Config.options?.bar.workspaces.showAppIcons && wsApp.biggestWindow) ? (root.workspaceButtonWidth - root.workspaceIconSize) / 2 : root.workspaceIconMarginShrinked
+                        property real cornerMargin: (!root.superPressAndHeld && root.barOpts.workspaces.showAppIcons && wsApp.biggestWindow) ? (root.workspaceButtonWidth - root.workspaceIconSize) / 2 : root.workspaceIconMarginShrinked
                         anchors {
                             bottom: parent.bottom
                             right: parent.right
@@ -281,13 +283,13 @@ ButtonMouseArea {
                             implicitWidth: appIcon.implicitWidth
                             implicitHeight: appIcon.implicitHeight
                             colorizationColor: Appearance.m3colors.darkmode ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnPrimary
-                            colorization: Config.options.bar.workspaces.monochromeIcons ? 0.8 : 0.5
+                            colorization: root.barOpts.workspaces.monochromeIcons ? 0.8 : 0.5
                             brightness: 0
                             source: appIcon
 
-                            opacity: !Config.options?.bar.workspaces.showAppIcons ? 0 : (wsApp.biggestWindow && !root.superPressAndHeld && Config.options?.bar.workspaces.showAppIcons) ? 1 : wsApp.biggestWindow ? root.workspaceIconOpacityShrinked : 0
+                            opacity: !root.barOpts.workspaces.showAppIcons ? 0 : (wsApp.biggestWindow && !root.superPressAndHeld && root.barOpts.workspaces.showAppIcons) ? 1 : wsApp.biggestWindow ? root.workspaceIconOpacityShrinked : 0
                             visible: opacity > 0
-                            scale: ((!root.superPressAndHeld && Config.options?.bar.workspaces.showAppIcons) ? root.workspaceIconSize : root.workspaceIconSizeShrinked) / root.workspaceIconSize
+                            scale: ((!root.superPressAndHeld && root.barOpts.workspaces.showAppIcons) ? root.workspaceIconSize : root.workspaceIconSizeShrinked) / root.workspaceIconSize
 
                             Behavior on opacity {
                                 animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -346,7 +348,7 @@ ButtonMouseArea {
     /////////////////// Super key press handling ///////////////////
     Timer {
         id: superPressAndHeldTimer
-        interval: (Config?.options.bar.autoHide.showWhenPressingSuper.delay ?? 100)
+        interval: (root.barOpts.autoHide.showWhenPressingSuper.delay ?? 100)
         repeat: false
         onTriggered: {
             root.superPressAndHeld = true;
@@ -355,7 +357,7 @@ ButtonMouseArea {
     Connections {
         target: GlobalStates
         function onSuperDownChanged() {
-            if (!Config?.options.bar.autoHide.showWhenPressingSuper.enable)
+            if (!root.barOpts.autoHide.showWhenPressingSuper.enable)
                 return;
             if (GlobalStates.superDown)
                 superPressAndHeldTimer.restart();
@@ -391,6 +393,7 @@ ButtonMouseArea {
 
     component NumberWorkspaceItem: WorkspaceItem {
         id: wsNum
+        readonly property var barOpts: ScreenConfig.barOf(wsNum)
         property bool hasBiggestWindow: !!wsModel.biggestWindow[index]
         property int wsId: wsModel.getWorkspaceIdAt(index)
         property color contentColor: (wsModel.occupied[wsNum.index] && wsId !== wsModel.fakeWorkspace) ? Appearance.colors.colOnSecondaryContainer : (root.contentColorOverridden ? Qt.alpha(root.contentColor, 0.5) : Appearance.colors.colOnLayer1Inactive)
@@ -399,7 +402,7 @@ ButtonMouseArea {
                 return true;
             if (GlobalStates.screenLocked)
                 return false;
-            if (Config.options?.bar.workspaces.alwaysShowNumbers && (!Config.options?.bar.workspaces.showAppIcons || !wsNum.hasBiggestWindow))
+            if (wsNum.barOpts.workspaces.alwaysShowNumbers && (!wsNum.barOpts.workspaces.showAppIcons || !wsNum.hasBiggestWindow))
                 return true;
             return false;
         }
@@ -409,7 +412,7 @@ ButtonMouseArea {
             anchors.centerIn: parent
             Loader {
                 anchors.centerIn: parent
-                sourceComponent: (Config.options?.bar.workspaces.indicatorStyle ?? "dot") === "icon" ? iconComponent : dotComponent
+                sourceComponent: (wsNum.barOpts.workspaces.indicatorStyle ?? "dot") === "icon" ? iconComponent : dotComponent
 
                 Component {
                     id: dotComponent
@@ -452,10 +455,10 @@ ButtonMouseArea {
                 anchors.centerIn: parent
                 font {
                     pixelSize: Appearance.font.pixelSize.small - ((text.length - 1) * (text !== "10") * 2)
-                    family: Config.options?.bar.workspaces.useNerdFont ? Appearance.font.family.iconNerd : defaultFont
+                    family: wsNum.barOpts.workspaces.useNerdFont ? Appearance.font.family.iconNerd : defaultFont
                 }
                 color: wsNum.contentColor
-                text: Config.options?.bar.workspaces.numberMap[wsNum.wsId - 1] || wsNum.wsId
+                text: wsNum.barOpts.workspaces.numberMap[wsNum.wsId - 1] || wsNum.wsId
             }
         }
     }
