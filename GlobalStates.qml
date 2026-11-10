@@ -52,6 +52,8 @@ Singleton {
     property string wallpaperSelectorTarget: "wallpaper"
     // Monitor whose wallpaper the selector changes; empty = the global one
     property string wallpaperSelectorScreen: ""
+    // Monitor whose own bar the settings edit; empty = the global bar
+    property string barSettingsScreen: ""
     property bool dropShelfOpen: false
     property real dropShelfX: 0
     property real dropShelfY: 0

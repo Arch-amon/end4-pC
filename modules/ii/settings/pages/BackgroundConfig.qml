@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import Quickshell
 import Quickshell.Hyprland
 
 
@@ -12,10 +13,30 @@ ContentPage {
     id: page
     forceWidth: true
 
+    // Monitor whose wallpaper the carousel shows and changes; empty = the
+    // default wallpaper, shown on every monitor without its own.
+    property string wallScreen: ""
+    readonly property bool wallScreenValid: Quickshell.screens.some(screen => screen.name === page.wallScreen)
+    readonly property string targetScreen: wallScreenValid ? wallScreen : ""
+
     function displayPathFor(path) {
         return /\.(mp4|webm|mkv|avi|mov)$/i.test(path)
-            ? Config.options.background.thumbnailPath
+            ? ScreenConfig.thumbnailFor(page.targetScreen)
             : path
+    }
+
+    function openSelectorFor(target) {
+        GlobalStates.wallpaperSelectorTarget = target
+        GlobalStates.wallpaperSelectorScreen = target === "lockWall" ? "" : page.targetScreen
+        GlobalStates.wallpaperSelectorOpen = true
+    }
+
+    // Recolor from a monitor's wallpaper. The config write is debounced, so
+    // the script is told the new source directly.
+    function setThemeSource(screenName) {
+        Config.options.background.themeSourceScreen = screenName
+        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch", "--theme-source", screenName,
+            "--mode", Appearance.m3colors.darkmode ? "dark" : "light"])
     }
 
     ColumnLayout {
@@ -28,6 +49,61 @@ ContentPage {
             icon: "panorama"
             title: Translation.tr("Wallpaper")
             shape: MaterialShape.Shape.Clover4Leaf
+
+            ContentSubsection {
+                visible: Quickshell.screens.length > 1
+                title: Translation.tr("Monitor")
+
+                ConfigSelectionArray {
+                    currentValue: page.targetScreen
+                    onSelected: newValue => page.wallScreen = newValue
+                    options: [
+                        { displayName: Translation.tr("Default"), icon: "tv_displays", value: "" },
+                        ...Quickshell.screens.map(screen => ({
+                            displayName: screen.name,
+                            icon: ScreenConfig.hasOwnWallpaper(screen) ? "wallpaper" : "monitor",
+                            value: screen.name
+                        }))
+                    ]
+                }
+
+                NoticeBox {
+                    Layout.fillWidth: true
+                    materialIcon: page.targetScreen === "" ? "tv_displays"
+                        : ScreenConfig.hasOwnWallpaper(page.targetScreen) ? "wallpaper" : "link"
+                    text: page.targetScreen === ""
+                        ? Translation.tr("The default wallpaper is shown on every monitor that doesn't have its own.")
+                        : ScreenConfig.hasOwnWallpaper(page.targetScreen)
+                            ? Translation.tr("%1 has its own wallpaper.").arg(page.targetScreen)
+                            : Translation.tr("%1 shows the default wallpaper. Pick one below to give it its own.").arg(page.targetScreen)
+
+                    Item { Layout.fillWidth: true }
+
+                    RippleButtonWithIcon {
+                        visible: page.targetScreen !== "" && ScreenConfig.hasOwnWallpaper(page.targetScreen)
+                        Layout.fillWidth: false
+                        buttonRadius: Appearance.rounding.small
+                        materialIcon: "restart_alt"
+                        mainText: Translation.tr("Use default")
+                        onClicked: Wallpapers.resetScreen(page.targetScreen)
+                        colBackground: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer)
+                        colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                        colRipple: Appearance.colors.colPrimaryContainerActive
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Colors follow")
+                    icon: "palette"
+                    currentValue: ScreenConfig.themeSourceScreen
+                    onSelected: newValue => page.setThemeSource(newValue)
+                    options: Quickshell.screens.map(screen => ({
+                        displayName: screen.name,
+                        icon: "monitor",
+                        value: screen.name
+                    }))
+                }
+            }
 
             Rectangle {
                 Layout.fillWidth: true
@@ -52,19 +128,16 @@ ContentPage {
                         mediumItemWidthRatio: 0.485
                         itemSpacing: 8
                         model: [
-                            page.displayPathFor(Config.options.background.wallpaperPath),
+                            page.displayPathFor(ScreenConfig.wallpaperFor(page.targetScreen)),
                             page.displayPathFor(
                                 Config.options.background.lockWall !== ""
                                     ? Config.options.background.lockWall
-                                    : Config.options.background.wallpaperPath
+                                    : ScreenConfig.wallpaperFor(page.targetScreen)
                             )
                         ]
                         wheelEnabled: false
                         dragEnabled: false
-                        clickAction: (index, modelData) => {
-                            GlobalStates.wallpaperSelectorTarget = index === 1 ? "lockWall" : "wallpaper"
-                            GlobalStates.wallpaperSelectorOpen = true
-                        }
+                        clickAction: (index, modelData) => page.openSelectorFor(index === 1 ? "lockWall" : "wallpaper")
                     }
 
                     RowLayout {
@@ -142,13 +215,10 @@ ContentPage {
                         largeItemWidthRatio: 1
                         mediumItemWidthRatio: 0
                         itemSpacing: 8
-                        model: [page.displayPathFor(Config.options.background.wallpaperPath)]
+                        model: [page.displayPathFor(ScreenConfig.wallpaperFor(page.targetScreen))]
                         wheelEnabled: false
                         dragEnabled: false
-                        clickAction: (index, modelData) => {
-                            GlobalStates.wallpaperSelectorTarget = "wallpaper"
-                            GlobalStates.wallpaperSelectorOpen = true
-                        }
+                        clickAction: (index, modelData) => page.openSelectorFor("wallpaper")
                     }
 
                     Rectangle {
@@ -166,7 +236,7 @@ ContentPage {
                                 color: Appearance.colors.colPrimary
                             }
                             StyledText {
-                                text: Config.options.background.wallpaperPath.split("/").pop()
+                                text: ScreenConfig.wallpaperFor(page.targetScreen).split("/").pop()
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 font.weight: Font.Medium
                                 color: Appearance.colors.colOnLayer1
