@@ -23,19 +23,13 @@ MouseArea {
     property bool filterFieldFocused: false
     property Item activeFilterField: null
 
+    // Quick-access folders: home (optional) plus the wallpaper folders,
+    // which can be edited from the folders dialog.
+    property bool showFoldersDialog: false
+
     property var quickDirs: [
-        { icon: "home",       name: "Home   ",       path: `${Directories.home}`,                alwaysVisible: Config.options.wallpaperSelector.showHomePath },
-        { icon: "wallpaper",  name: "Wallpapers   ", path: `${Directories.pictures}/Wallpapers`, alwaysVisible: true },
-        { icon: "imagesmode", name: "Homework   ",   path: `${Directories.pictures}/homework`,   alwaysVisible: Config.options.policies.weeb },
-        { icon: "casino",     name: "Random   ",     path: `${Directories.pictures}/Random`,     alwaysVisible: true },
-        { 
-            icon: "image",     
-            name: Config.options.wallpaperSelector.userPath?.trim().length > 0 
-                ? Config.options.wallpaperSelector.userPath.split("/").filter(s => s.length > 0).pop() + "   "
-                : "Custom   ",
-            path: Config.options.wallpaperSelector.userPath, 
-            alwaysVisible: Config.options.wallpaperSelector.userPath?.trim().length > 0 
-        }
+        { icon: "home", name: "Home   ", path: `${Directories.home}`, alwaysVisible: Config.options.wallpaperSelector.showHomePath },
+        ...Wallpapers.folders.map(folder => ({ icon: folder.icon, name: folder.name + "   ", path: folder.path, alwaysVisible: true }))
     ]
 
     // Wallhaven 9-color filter groups — surfaced in the header array like blapples' picker.
@@ -57,7 +51,7 @@ MouseArea {
         const cellW = item?.cellWidth ?? (wallpaperGridBackground.width / root.columns);
         const cellH = item?.cellHeight ?? (cellW / root.previewCellAspectRatio);
         const thumbnailSizeName = Images.thumbnailSizeNameForDimensions(cellW - totalImageMargin, cellH - totalImageMargin);
-        Wallpapers.setDirectory(`${Directories.pictures}/Wallpapers`);
+        Wallpapers.setDirectory(Wallpapers.defaultFolder);
         Qt.callLater(() => Wallpapers.generateThumbnail(thumbnailSizeName));
     }
 
@@ -632,6 +626,15 @@ MouseArea {
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
+                                    toggled: root.showFoldersDialog
+                                    onClicked: root.showFoldersDialog = !root.showFoldersDialog
+                                    text: "folder_managed"
+                                    StyledToolTip {
+                                        text: Translation.tr("Wallpaper folders")
+                                    }
+                                }
+                                IconToolbarButton {
+                                    implicitWidth: height
                                     onClicked: Wallpapers.randomFromCurrentFolder(root.useDarkMode, GlobalStates.wallpaperSelectorScreen)
                                     text: "ifl"
                                     StyledToolTip {
@@ -896,6 +899,20 @@ MouseArea {
         function onChanged() {
             if (Config.options.wallpaperSelector.closeAfterSelection)
                 GlobalStates.wallpaperSelectorOpen = false;
+        }
+    }
+
+    // Manage the quick-access wallpaper folders
+    Loader {
+        anchors.fill: parent
+        z: 100
+        active: root.showFoldersDialog
+        onLoaded: {
+            item.show = true
+            item.forceActiveFocus()
+        }
+        sourceComponent: WallpaperFoldersDialog {
+            onDismiss: root.showFoldersDialog = false
         }
     }
 }
