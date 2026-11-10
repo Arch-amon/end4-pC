@@ -238,6 +238,17 @@ LazyLoader {
         WlrLayershell.namespace: root.morph ? "quickshell:popupMorph" : "quickshell:popup"
         WlrLayershell.layer: WlrLayer.Overlay
 
+        // Give the content back before this window goes away, so the next
+        // popup never adopts it while it still belongs to this one.
+        function releaseContent() {
+            const content = popupWindow.innerContent
+            if (content && content.parent === contentHolder) {
+                content.anchors.centerIn = undefined
+                content.parent = null
+            }
+        }
+        Component.onDestruction: popupWindow.releaseContent()
+
         Connections {
             target: root
             function onShouldShowChanged() {
@@ -348,9 +359,13 @@ LazyLoader {
                     }
                 }
 
-                // Reparent content here once the window is ready
+                // Reparent content here once the window is ready. Detach it
+                // from any previous popup window first: the content outlives
+                // the windows, and an item attached to two windows at once
+                // ("Cannot use same item on different windows") crashes Qt.
                 Component.onCompleted: {
                     if (popupWindow.innerContent) {
+                        popupWindow.innerContent.parent = null
                         popupWindow.innerContent.parent = contentHolder
                         popupWindow.innerContent.anchors.centerIn = contentHolder
                     }
@@ -412,7 +427,10 @@ LazyLoader {
 
         ParallelAnimation {
             id: closeAnim
-            onFinished: root.closing = false
+            onFinished: {
+                popupWindow.releaseContent()
+                root.closing = false
+            }
             NumberAnimation {
                 target: bodyScale
                 property: root.barVertical ? "xScale" : "yScale"
