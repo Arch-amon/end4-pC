@@ -14,7 +14,7 @@ import Quickshell.Hyprland
 WindowDialog {
     id: root
     property var screen: root.QsWindow.window?.screen
-    property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    property var brightnessMonitor: Brightness.targetMonitor(screen)
     backgroundHeight: 700
 
     WindowDialogTitle {
@@ -112,14 +112,23 @@ WindowDialog {
         Layout.bottomMargin: -10
     }
 
+    BrightnessMonitorPicker {
+        visible: Brightness.monitors.length > 1
+        Layout.fillWidth: true
+        Layout.leftMargin: 0
+        Layout.rightMargin: 0
+        currentScreen: root.screen
+    }
+
     GroupedList {
+        visible: root.brightnessMonitor?.hasHardwareBrightness ?? true
         itemVerticalPadding: 16
         bgcolor: Appearance.colors.colSurfaceContainerHigh  
 
         WindowDialogSlider {
             Layout.topMargin: -2
-            value: root.brightnessMonitor.brightness
-            onMoved: root.brightnessMonitor.setBrightness(value)
+            value: root.brightnessMonitor?.brightness ?? 1
+            onMoved: root.brightnessMonitor?.setBrightness(value)
         }
     }
 
@@ -132,9 +141,9 @@ WindowDialog {
         itemVerticalPadding: 16
         bgcolor: Appearance.colors.colSurfaceContainerHigh
         WindowDialogSlider {
-            from: Hyprsunset.gammaLowerLimit / 100
-            value: Hyprsunset.gamma / 100
-            onMoved: Hyprsunset.setGamma(value * 100)
+            from: MonitorGamma.lowerLimit / 100
+            value: (root.brightnessMonitor?.gamma ?? 100) / 100
+            onMoved: root.brightnessMonitor?.setGamma(value * 100)
             tooltipContent: `${Math.round(value * 100)}%`
         }
     }

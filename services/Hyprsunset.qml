@@ -9,16 +9,13 @@ import Quickshell.Hyprland
 
 Singleton {
     id: root
-    signal gammaChangeAttempt()
 
-    readonly property real gammaLowerLimit: 25
     readonly property bool isNiri: WM.compositor === "niri"
 
     property string from: Config.options?.light?.night?.from ?? "19:00"
     property string to: Config.options?.light?.night?.to ?? "06:30"
     property bool automatic: (Config.options?.light?.night?.automatic ?? false) && (Config?.ready ?? true)
     property int colorTemperature: Config.options?.light?.night?.colorTemperature ?? 5000
-    property int gamma: 100
     property bool shouldBeOn
     property bool firstEvaluation: true
     property bool temperatureActive: false
@@ -116,16 +113,7 @@ Singleton {
         root.temperatureActive = false;
     }
 
-    function setGamma(gamma) {
-        root.gamma = Math.max(root.gammaLowerLimit, Math.min(100, gamma));
-        root.gammaChangeAttempt();
-
-        if (root.isNiri) {
-            return;
-        }
-        root.startHyprsunset();
-        Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
-    }
+    // Gamma is per monitor now: see MonitorGamma.
 
     function startNiriSunset(temp) {
         const low = temp;

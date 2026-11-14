@@ -58,8 +58,8 @@ Scope {
     }
 
     Connections {
-        target: Hyprsunset
-        function onGammaChangeAttempt() {
+        target: MonitorGamma
+        function onGammaChangeAttempt(screenName) {
             root.protectionMessage = "";
             root.currentIndicator = "gamma";
             root.triggerOsd();

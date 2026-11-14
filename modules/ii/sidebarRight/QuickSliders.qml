@@ -18,7 +18,7 @@ Rectangle {
     }
 
     property var screen: root.QsWindow.window?.screen
-    property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    property var brightnessMonitor: Brightness.targetMonitor(screen)
 
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
@@ -43,28 +43,31 @@ Rectangle {
                 right: parent.right
             }
             visible: active
+            active: Config.options.sidebar.quickSliders.showBrightness && Brightness.monitors.length > 1
+            sourceComponent: BrightnessMonitorPicker {
+                currentScreen: root.screen
+            }
+        }
+
+        Loader {
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+            visible: active
             active: Config.options.sidebar.quickSliders.showBrightness
             sourceComponent: QuickSlider {
-                materialSymbol: "brightness_medium"
-                secondaryMaterialSymbol: "wb_twilight"
-                stopIndicatorValues: Hyprsunset.gamma !== 100 && root.brightnessMonitor?.brightness !== 0 ? [0.3 + root.brightnessMonitor?.brightness * 0.7] : []
-                value: Hyprsunset.gamma === 100? 0.3 + root.brightnessMonitor?.brightness * 0.7 : (Hyprsunset.gamma - Hyprsunset.gammaLowerLimit) / (100 - Hyprsunset.gammaLowerLimit) * 0.3
-                tooltipContent: Hyprsunset.gamma === 100 ? `${Math.round(root.brightnessMonitor?.brightness * 100)}%` : `${Translation.tr("Gamma")} ${Hyprsunset.gamma}%`
-                onMoved: {
-                    if (value >= 0.3) {
-                        // 0.3 - 1.0 brightness
-                        root.brightnessMonitor.setBrightness((value - 0.3) / 0.7);
-                        if (Hyprsunset.gamma !== 100) {
-                            Hyprsunset.setGamma(100);
-                        }
-                    } else {
-                        // 0 - 0.3 gamma
-                        if (root.brightnessMonitor.brightness !== 0) {
-                            root.brightnessMonitor.setBrightness(0);
-                        }
-                        Hyprsunset.setGamma((value / 0.3 * (100 - Hyprsunset.gammaLowerLimit) + Hyprsunset.gammaLowerLimit));
-                    }
-                }
+                readonly property var monitor: root.brightnessMonitor
+                readonly property bool hardware: monitor?.hasHardwareBrightness ?? true
+                materialSymbol: hardware ? "brightness_medium" : "wb_twilight"
+                secondaryMaterialSymbol: hardware ? "wb_twilight" : ""
+                stopIndicatorValues: hardware && monitor?.gamma !== 100 && monitor?.brightness !== 0
+                    ? [Brightness.gammaShare + monitor.brightness * (1 - Brightness.gammaShare)] : []
+                value: monitor?.combinedLevel ?? 1
+                tooltipContent: !hardware || monitor?.gamma !== 100
+                    ? `${Translation.tr("Gamma")} ${monitor?.gamma ?? 100}%`
+                    : `${Math.round((monitor?.brightness ?? 1) * 100)}%`
+                onMoved: monitor?.setCombinedLevel(value)
             }
         }
 

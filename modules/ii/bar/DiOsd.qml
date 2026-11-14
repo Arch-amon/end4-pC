@@ -17,10 +17,7 @@ RowLayout {
     }
     spacing: 6
 
-    readonly property var focusedScreen: WM.compositor === "hyprland"
-        ? Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
-        : Quickshell.screens.find(s => s.name === WM.focusedMonitor?.name)
-    readonly property var brightnessMonitor: Brightness.getMonitorForScreen(focusedScreen)
+    readonly property var brightnessMonitor: Brightness.osdMonitor()
 
     MaterialShapeWrappedMaterialSymbol {
         Layout.alignment: Qt.AlignVCenter
@@ -40,7 +37,7 @@ RowLayout {
         text: {
             switch (GlobalStates.osdIndicatorType) {
                 case "brightness": return `${Math.round((brightnessMonitor?.brightness ?? 0.5) * 100)}`
-                case "gamma":      return `${Math.round((Hyprsunset.gamma ?? 50))}`
+                case "gamma":      return `${Math.round((brightnessMonitor?.gamma ?? 100))}`
                 default:           return `${Math.round((Audio.sink?.audio?.volume ?? 0) * 100)}`
             }
         }

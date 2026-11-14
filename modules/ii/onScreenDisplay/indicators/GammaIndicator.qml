@@ -4,10 +4,13 @@ import Quickshell
 import qs.modules.ii.onScreenDisplay
 
 OsdValueIndicator {
-    id: rotateIcon
+    id: root
+    readonly property var monitor: Brightness.osdMonitor()
 
     icon: "wb_twilight"
-    name: Translation.tr("Gamma")
-    from: Hyprsunset.gammaLowerLimit / 100
-    value: Hyprsunset.gamma / 100 ?? 0.5
+    name: Quickshell.screens.length > 1
+        ? `${Translation.tr("Gamma")} · ${Brightness.displayName(root.monitor)}`
+        : Translation.tr("Gamma")
+    from: MonitorGamma.lowerLimit / 100
+    value: (root.monitor?.gamma ?? 100) / 100
 }
