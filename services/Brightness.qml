@@ -23,32 +23,58 @@ Singleton {
         screen
     }))
 
+    // Monitor the brightness sliders act on; empty = the screen the slider is on.
+    property string selectedScreenName: ""
+    // Monitor whose brightness or gamma changed last, for the OSD.
+    property string lastChangedScreenName: ""
+    // Share of a combined slider below which it drives gamma instead of hardware brightness.
+    readonly property real gammaShare: 0.3
+
     function getMonitorForScreen(screen: ShellScreen): var {
         return monitors.find(m => m.screen === screen);
     }
 
+    function monitorByName(name: string): var {
+        return monitors.find(m => m.screen?.name === name);
+    }
+
+    function targetMonitor(screen: ShellScreen): var {
+        return monitorByName(root.selectedScreenName) ?? getMonitorForScreen(screen);
+    }
+
+    function focusedMonitor(): var {
+        const focusedName = WM.compositor === "hyprland" ? Hyprland.focusedMonitor?.name : WM.focusedMonitor?.name;
+        return monitorByName(focusedName);
+    }
+
+    // Monitor the OSD should describe: the one that just changed, else the focused one.
+    function osdMonitor(): var {
+        return monitorByName(root.lastChangedScreenName) ?? focusedMonitor();
+    }
+
+    function displayName(monitor: var): string {
+        return monitor?.screen?.model || monitor?.screen?.name || "";
+    }
+
     function increaseBrightness(): void {
+        const monitor = focusedMonitor();
+        if (!monitor) return;
         // if gamma is not yet 100, first increase gamma
-        if (Hyprsunset.gamma !== 100) {
-            Hyprsunset.setGamma(Hyprsunset.gamma + 5);
+        if (monitor.gamma !== 100 || !monitor.hasHardwareBrightness) {
+            monitor.setGamma(monitor.gamma + 5);
             return;
         }
-
-        const focusedName = Hyprland.focusedMonitor.name;
-        const monitor = monitors.find(m => focusedName === m.screen.name);
-        if (monitor)
-            monitor.setBrightness(monitor.brightness + 0.05);
+        monitor.setBrightness(monitor.brightness + 0.05);
     }
 
     function decreaseBrightness(): void {
-        const focusedName = Hyprland.focusedMonitor.name;
-        const monitor = monitors.find(m => focusedName === m.screen.name);
-        if (monitor && monitor.brightness > 0) 
+        const monitor = focusedMonitor();
+        if (!monitor) return;
+        if (monitor.hasHardwareBrightness && monitor.brightness > 0)
             monitor.setBrightness(monitor.brightness - 0.05);
-        // if brightness is 0, then decrease gamma
-        else {
-            Hyprsunset.setGamma(Hyprsunset.gamma - 5);
-        }
+        // if brightness is 0 (or the monitor has none), then decrease gamma
+        else
+            monitor.setGamma(monitor.gamma - 5);
     }
 
     reloadableId: "brightness"
@@ -95,7 +121,18 @@ Singleton {
         id: monitor
 
         required property ShellScreen screen
+        readonly property string name: screen?.name ?? ""
         property bool isDdc
+        // False for screens with neither DDC/CI nor a backlight (most TVs): gamma only.
+        property bool hasHardwareBrightness: true
+        readonly property int gamma: MonitorGamma.gammaOf(monitor.name)
+        // One 0..1 value for the sliders: gamma in [0, gammaShare), hardware brightness above.
+        readonly property real combinedLevel: {
+            const gammaLevel = (monitor.gamma - MonitorGamma.lowerLimit) / (100 - MonitorGamma.lowerLimit);
+            if (!monitor.hasHardwareBrightness) return gammaLevel;
+            if (monitor.gamma !== 100) return gammaLevel * root.gammaShare;
+            return root.gammaShare + monitor.brightness * (1 - root.gammaShare);
+        }
         property string busNum
         property int rawMaxBrightness: 100
         property real brightness
@@ -106,6 +143,7 @@ Singleton {
 
         onBrightnessChanged: {
             if (!monitor.ready) return;
+            root.lastChangedScreenName = monitor.name;
             root.brightnessChanged();
         }
 
@@ -127,7 +165,16 @@ Singleton {
             const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));
             isDdc = !!match;
             busNum = match?.busNum ?? "";
-            initProc.command = isDdc ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"] : ["sh", "-c", `echo "a b c $(brightnessctl g) $(brightnessctl m)"`];
+            // A backlight belongs to the built-in panel only, never to an external screen.
+            const internal = /^(eDP|LVDS|DSI)/.test(monitor.name);
+            hasHardwareBrightness = isDdc || internal;
+            if (!hasHardwareBrightness) {
+                monitor.brightness = 1;
+                monitor.ready = true;
+                initializeMonitor(root.monitors.indexOf(monitor) + 1);
+                return;
+            }
+            initProc.command = isDdc ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"] : ["sh", "-c", `echo "a b c $(brightnessctl --class backlight g) $(brightnessctl --class backlight m)"`];
             initProc.running = true;
         }
 
@@ -135,6 +182,13 @@ Singleton {
             stdout: SplitParser {
                 onRead: data => {
                     const [, , , current, max] = data.split(" ");
+                    if (isNaN(parseInt(current)) || !(parseInt(max) > 0)) {
+                        // getvcp/brightnessctl failed: treat it like a screen without hardware brightness
+                        monitor.hasHardwareBrightness = false;
+                        monitor.brightness = 1;
+                        monitor.ready = true;
+                        return;
+                    }
                     monitor.rawMaxBrightness = parseInt(max);
                     monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;
                     monitor.ready = true;
@@ -155,6 +209,7 @@ Singleton {
         }
 
         function syncBrightness() {
+            if (!monitor.hasHardwareBrightness || !monitor.ready) return;
             const brightnessValue = Math.max(monitor.multipliedBrightness, 0);
             if (isDdc) {
                 const rawValueRounded = Math.max(Math.floor(brightnessValue * monitor.rawMaxBrightness), 1);
@@ -170,6 +225,25 @@ Singleton {
         function setBrightness(value: real): void {
             value = Math.max(0, Math.min(1, value));
             monitor.brightness = value;
+        }
+
+        function setGamma(value: real): void {
+            root.lastChangedScreenName = monitor.name;
+            MonitorGamma.setGamma(monitor.name, value);
+        }
+
+        function setCombinedLevel(value: real): void {
+            value = Math.max(0, Math.min(1, value));
+            const toGamma = level => MonitorGamma.lowerLimit + level * (100 - MonitorGamma.lowerLimit);
+            if (!monitor.hasHardwareBrightness) {
+                monitor.setGamma(toGamma(value));
+            } else if (value >= root.gammaShare) {
+                monitor.setBrightness((value - root.gammaShare) / (1 - root.gammaShare));
+                if (monitor.gamma !== 100) monitor.setGamma(100);
+            } else {
+                if (monitor.brightness !== 0) monitor.setBrightness(0);
+                monitor.setGamma(toGamma(value / root.gammaShare));
+            }
         }
 
         function setBrightnessMultiplier(value: real): void {
