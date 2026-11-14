@@ -61,7 +61,7 @@ Rectangle {
                 readonly property bool hardware: monitor?.hasHardwareBrightness ?? true
                 materialSymbol: hardware ? "brightness_medium" : "wb_twilight"
                 secondaryMaterialSymbol: hardware ? "wb_twilight" : ""
-                stopIndicatorValues: hardware && monitor?.gamma !== 100 && monitor?.brightness !== 0
+                stopIndicatorValues: monitor && hardware && monitor.gamma !== 100 && monitor.brightness !== 0
                     ? [Brightness.gammaShare + monitor.brightness * (1 - Brightness.gammaShare)] : []
                 value: monitor?.combinedLevel ?? 1
                 tooltipContent: !hardware || monitor?.gamma !== 100
